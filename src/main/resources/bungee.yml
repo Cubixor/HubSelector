@@ -1,0 +1,33 @@
+name: HubSelector
+version: ${project.version}
+main: me.cubixor.hubselector.bungeecord.HubSelectorBungee
+description: Hub Selector plugin
+author: Cubixor
+permissions:
+  hub.vip:
+    description: Join vip hubs
+    default: op
+  hub.use:
+    description: Use /hub command
+    default: true
+  hub.choose:
+    description: Use /hub <hub_name> command
+    default: true
+  hub.choose.others:
+    description: Use /hub <hub_name> <player> command
+    default: op
+  hub.help:
+    description: Use /hubselector command
+    default: true
+  hub.reload:
+    description: Use /hubselector reload command
+    default: op
+commands:
+  hub:
+    description: Hub cmd
+    usage: /hub
+    aliases: lobby
+  hubselector:
+    description: Hubselector cmd
+    usage: /hubselector
+    aliases: hs

@@ -1,0 +1,90 @@
+prefix: "&d&lHubSelector &7&l»&r"
+
+item:
+  hub-item-name: "&9&lSelect hub"
+  hub-item-lore:
+    - "&7Click to open hub menu"
+    - "&7and choose the hub you"
+    - "&7want to teleport to!"
+
+menu:
+  hub-menu-name: "&9&lSelect hub"
+  vip-hub-item-lore:
+    - "&cAvailable only for VIP's!"
+    - ""
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&aClick to join!"
+  vip-hub-item-lore-current:
+    - "&cAvailable only for VIP's!"
+    - ""
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&cYou are in this hub!"
+  hub-item-lore:
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&aClick to join!"
+  offline-hub-item-lore:
+    - "&cOffline!"
+  full-hub-item-lore:
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&cThis hub is full!"
+  current-hub-item-lore:
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&cYou are in this hub!"
+
+  close-item-name: "&cClose"
+  close-item-lore:
+    - "&7Close this menu"
+  next-page-item-name: "&eNext page"
+  next-page-item-lore:
+    - "&7Go to the next page"
+  previous-page-item-name: "&ePrevious page"
+  previous-page-item-lore:
+    - "&7Go to the previous page"
+
+connect:
+  hub-offline: "%prefix% &cThis hub is offline!"
+  hub-full: "%prefix% &cThis hub is full!"
+  hub-current: "%prefix% &cYou are already connected to this hub!"
+  hub-vip: "%prefix% &cYou need to be a VIP to join this hub!"
+  full: "%prefix% &cAll hub servers are full! Please try again later."
+  success: "%prefix% &7Connecting to hub %hub%&7..."
+
+
+join:
+  kick-full: "&cThere are no available hub servers now! Please try again later!"
+
+
+command:
+  help:
+    - "&m-----&r&d&lHubSelector&f&m-----"
+    - ""
+    - " &7- &e/hubselector (/hubselector help) &7- Display this help page (hub.help)"
+    - " &7- &e/hubselector reload &7- Reload all configs (hub.reload)"
+    - " &7- &e/hub &7- Teleport to hub (hub.use)"
+    - " &7- &e/hub <hub_name> &7- Teleport to chosen hub (hub.choose)"
+    - " &7- &e/hub <hub_name> <player> &7- Teleport specific player to chosen hub (hub.choose)"
+    - ""
+    - "&7You can use * instead of hub name to teleport to random hub."
+    - "&7You can use /hs instead of /hubselector and /lobby instead of hub"
+    - "&m---------------------"
+  not-player: "%prefix% &cYou have to be player to execute this command!"
+  invalid-player: "%prefix% &cThere is no player with that nickname!"
+  invalid-hub: "%prefix% &cThis hub is not available now!"
+  already-in-hub: "%prefix% &cYou are already in server hub!"
+  usage: "%prefix% &cThis command does not require any arguments! &7Use just /hub or /lobby!"
+  usage-choose: "%prefix% &cWrong usage! &7Use /hub <hub_name> or /lobby <hub_name>."
+  usage-choose-others: "%prefix% &cWrong usage! &7Use /hub <hub_name> [player] or /lobby <hub_name> [player]>."
+  reload-complete: "%prefix% &aReload complete!"
+  no-permission: "%prefix% &cYou don't have permission to execute this command!"
+  unknown-command: "%prefix% &cUnknown command! &7Type /hs help for help."
+  no-players: "%prefix% &cAt least one person must be connected to the server to perform the reload!"
+
+
+
+# Messages version - DO NOT CHANGE IT!
+messages-version: 1.0

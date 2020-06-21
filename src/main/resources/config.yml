@@ -1,0 +1,120 @@
+# HubSelector - config.yml v1.0
+
+
+# Servers that are hubs.
+#
+#  hub: - Server name set in bungeecord config.yml. WARNING! This name and name in "servers" category in bungeecord config MUST BE THE SAME!
+#    name: "&3&lHub x" - Hub name displayed in hub menu.
+#    slots: 50 - Hub slots. WARNING! Server slots amount set in server.properties file must be higher than value set here!
+#    vip: false - If true hub will be available only for players with hub.vip permission.
+#
+# Example:
+#  nameFromBungeeConfig:
+#    name: "&3&lName displayed in menu"
+#    slots: 100
+#    vip: false
+hub-servers:
+  hub1:
+    name: "&3&lHub 1"
+    slots: 50
+    vip: false
+  hub2:
+    name: "&3&lHub 2"
+    slots: 50
+    vip: false
+  hub3:
+    name: "&6&lVIP Hub 3"
+    slots: 50
+    vip: true
+
+
+# The way that players are placed on hub when they join.
+#
+# Use RANDOM to put players on random server.
+# Use LEAST-PLAYERS to put players on server with the least number of players.
+# Use MAX-PLAYERS to put players on server with the highest number of players.
+# Use FIRST-AVAILABLE to put players on first available server from the list.
+hub-choose-method: LEAST-PLAYERS
+
+
+# Putting vip players on vip servers priority, using method chosen above, in section "hub-choose-method"
+#
+# If set to HIGH, plugin will try to put vip players on vip hubs.
+# For example if "hub-choose-method" is set to RANDOM plugin will put player on random vip server. If all vip servers are offline or full plugin will put player on regular server.
+#
+# If set to MEDIUM, plugin will include all servers when choosing server for vip player.
+# For example if "hub-choose-method" is set to RANDOM, plugin will put player on random vip or regular hub server.
+#
+# If set to LOW, plugin will only put vip players on vip servers when all regular servers are unavailable (full or offline).
+#
+vip-priority: HIGH
+
+
+# All settings connected with hub selector item.
+item:
+
+  # Slot in which hub selector item will appear.
+  # The slot counting starts from zero, so the first slot number is 0, next is 1 and so on.
+  slot-number: 8
+
+  # Hub selector item type.
+  # ALl available item types are here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+  type: CLOCK
+
+# Settings connected with hub menu updating.
+menu-update:
+
+  # If true, hubs menu will be updated only when opened.
+  # If false hubs data displayed in hub menu (players, slots, hub state) will be updated every number of seconds set in "rate" section.
+  update-on-open-only: false
+
+  # Set how often (in seconds) menu will update (player count, slots, hub state).
+  # It matters only when "update-on-open-only" is set to "false".
+  rate: 10
+
+# Should "close" item be shown at the bottom of menu?
+show-menu-close-item: true
+
+# Maximum number of hub inventory rows per page.
+max-menu-rows: 5
+
+# If true player will be kicked from server after using /hub command while there is no available hubs.
+kick-if-full: true
+
+# All settings connected with hubs menu items.
+# ALl available item types are here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+menu-items:
+
+  # Item used to display a regular hub.
+  regular: SLIME_BALL
+
+  # Item used to display hub where the player is.
+  current: ENDER_EYE
+
+  # Item used to display a full hub.
+  full: FIRE_CHARGE
+
+  # Item used to display a vip hub.
+  vip: MAGMA_CREAM
+
+  # Item used to display an inactive (turned off) hub.
+  offline: RED_DYE
+
+
+  # Item used to close menu.
+  menu-close: BARRIER
+
+  # Item used to go to the next menu page
+  next-page: SPECTRAL_ARROW
+
+  # Item used to go to the previous menu page
+  previous-page: SPECTRAL_ARROW
+
+
+# Config version - DO NOT CHANGE IT!
+config-version: 1.0
+
+
+
+
+
