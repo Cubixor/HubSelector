@@ -1,7 +1,7 @@
 name: HubSelector
 main: me.cubixor.hubselector.spigot.HubSelector
 version: ${project.version}
-api-version: 1.15
+api-version: 1.16
 author: Cubixor
 permissions:
   hub.vip:

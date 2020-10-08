@@ -28,6 +28,7 @@ public final class HubSelectorBungee extends Plugin {
     JoinMethod.VipJoinMethods vipJoinMethodsInstance;
 
     HashMap<ProxiedPlayer, Integer> taskId = new HashMap<>();
+    List<String> serversToReload = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -44,6 +45,8 @@ public final class HubSelectorBungee extends Plugin {
         loadConfigs();
 
         new JoinMethod(this).joinMethodSetup();
+
+        serversToReload.addAll(getConfig().getSection("hub-servers").getKeys());
 
         /*new UpdateCheckerBungeeCord(this, 73688).getVersion(version -> {
             if (!this.getDescription().getVersion().equalsIgnoreCase(version)) {

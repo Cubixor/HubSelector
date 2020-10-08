@@ -149,7 +149,7 @@ public class HubMenu implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent evt) {
-        if (evt.getCurrentItem() != null && plugin.hubInventory.get(evt.getWhoClicked()).contains(evt.getClickedInventory())) {
+        if (evt.getCurrentItem() != null && evt.getClickedInventory() != null && plugin.hubInventory.get(evt.getWhoClicked()).contains(evt.getClickedInventory())) {
 
             evt.setCancelled(true);
             evt.getWhoClicked().closeInventory();

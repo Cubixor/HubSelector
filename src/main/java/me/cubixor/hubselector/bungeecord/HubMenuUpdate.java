@@ -15,13 +15,6 @@ public class HubMenuUpdate implements Listener {
 
 
     public void updateMenu(ProxiedPlayer player) {
-        plugin.taskId.put(player, plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
-            @Override
-            public void run() {
-
-                new BungeeChannel(plugin).getHubInfo(player);
-
-            }
-        }, 0, plugin.getConfig().getInt("menu-update.rate"), TimeUnit.SECONDS).getId());
+        plugin.taskId.put(player, plugin.getProxy().getScheduler().schedule(plugin, () -> new BungeeChannel(plugin).getHubInfo(player), 0, plugin.getConfig().getInt("menu-update.rate"), TimeUnit.SECONDS).getId());
     }
 }

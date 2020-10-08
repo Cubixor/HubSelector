@@ -49,7 +49,13 @@ public class HubSelectorCommand extends Command implements TabExecutor {
             plugin.loadConfigs();
             new JoinMethod(plugin).joinMethodSetup();
 
-            new BungeeChannel(plugin).getConfiguration(Iterables.getFirst(plugin.getProxy().getPlayers(), null));
+            for (String server : plugin.getConfig().getSection("hub-servers").getKeys()) {
+                if (plugin.getProxy().getServers().get(server).getPlayers().size() == 0) {
+                    plugin.serversToReload.add(server);
+                } else {
+                    new BungeeChannel(plugin).getConfiguration(Iterables.getFirst(plugin.getProxy().getServers().get(server).getPlayers(), null));
+                }
+            }
 
             sender.sendMessage(plugin.getMessage("command.reload-complete"));
 

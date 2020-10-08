@@ -8,6 +8,7 @@ import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.event.EventHandler;
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 public class BungeeChannel implements Listener {
@@ -26,6 +28,8 @@ public class BungeeChannel implements Listener {
     public BungeeChannel(HubSelectorBungee hsb) {
         plugin = hsb;
     }
+
+    ScheduledTask sd;
 
     public void getConfiguration(ProxiedPlayer player) {
         Collection<ProxiedPlayer> networkPlayers = ProxyServer.getInstance().getPlayers();
@@ -52,7 +56,16 @@ public class BungeeChannel implements Listener {
         out.writeUTF(configContentBuilder.toString());
         out.writeUTF(messagesContentBuilder.toString());
 
-        player.getServer().sendData("bungee:config", out.toByteArray());
+        sd = plugin.getProxy().getScheduler().schedule(plugin, new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    player.getServer().sendData("bungee:config", out.toByteArray());
+                    sd.cancel();
+                } catch (NullPointerException ignored) {
+                }
+            }
+        }, 0, 1, TimeUnit.MILLISECONDS);
     }
 
 
@@ -66,11 +79,7 @@ public class BungeeChannel implements Listener {
         String subChannel = in.readUTF();
         ProxiedPlayer player = (ProxiedPlayer) evt.getReceiver();
 
-
-        if (subChannel.equalsIgnoreCase("GetConfigs")) {
-            getConfiguration(player);
-
-        } else if (subChannel.equalsIgnoreCase("GetInfo")) {
+        if (subChannel.equalsIgnoreCase("GetInfo")) {
             String server = in.readUTF();
 
             new HubInventory(plugin).inventoryClickData(player, server);

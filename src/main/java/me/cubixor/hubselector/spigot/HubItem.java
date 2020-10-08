@@ -74,7 +74,11 @@ public class HubItem implements Listener {
         LinkedList<Inventory> hubInventory = new LinkedList<>();
 
         if (rowsCount <= maxRows) {
-            slotsCount = (rowsCount + 1) * 9;
+            if (plugin.getConfiguration().getBoolean("show-menu-close-item")) {
+                slotsCount = (rowsCount + 1) * 9;
+            } else {
+                slotsCount = rowsCount * 9;
+            }
             hubInventory.add(Bukkit.createInventory(null, slotsCount, plugin.getMessage("menu.hub-menu-name")));
         } else {
             slotsCount = (maxRows + 1) * 9;
@@ -86,13 +90,13 @@ public class HubItem implements Listener {
                 hubInventory.add(Bukkit.createInventory(null, slotsCount, plugin.getMessage("menu.hub-menu-name")));
             }
 
-            ItemStack nextItem = new ItemStack(Material.getMaterial(plugin.getConfiguration().getString("menu-items.next-page")), 1);
+            ItemStack nextItem = new ItemStack(Material.matchMaterial(plugin.getConfiguration().getString("menu-items.next-page")), 1);
             ItemMeta nextItemMeta = nextItem.getItemMeta();
             nextItemMeta.setDisplayName(plugin.getMessage("menu.next-page-item-name"));
             nextItemMeta.setLore(plugin.getMessageList("menu.next-page-item-lore"));
             nextItem.setItemMeta(nextItemMeta);
 
-            ItemStack previousItem = new ItemStack(Material.getMaterial(plugin.getConfiguration().getString("menu-items.previous-page")), 1);
+            ItemStack previousItem = new ItemStack(Material.matchMaterial(plugin.getConfiguration().getString("menu-items.previous-page")), 1);
             ItemMeta previousItemMeta = previousItem.getItemMeta();
             previousItemMeta.setDisplayName(plugin.getMessage("menu.previous-page-item-name"));
             previousItemMeta.setLore(plugin.getMessageList("menu.previous-page-item-lore"));
@@ -109,15 +113,16 @@ public class HubItem implements Listener {
             }
         }
 
+        if (plugin.getConfiguration().getBoolean("show-menu-close-item")) {
+            ItemStack closeItem = new ItemStack(Material.matchMaterial(plugin.getConfiguration().getString("menu-items.menu-close")), 1);
+            ItemMeta closeItemMeta = closeItem.getItemMeta();
+            closeItemMeta.setDisplayName(plugin.getMessage("menu.close-item-name"));
+            closeItemMeta.setLore(plugin.getMessageList("menu.close-item-lore"));
+            closeItem.setItemMeta(closeItemMeta);
 
-        ItemStack closeItem = new ItemStack(Material.getMaterial(plugin.getConfiguration().getString("menu-items.menu-close")), 1);
-        ItemMeta closeItemMeta = closeItem.getItemMeta();
-        closeItemMeta.setDisplayName(plugin.getMessage("menu.close-item-name"));
-        closeItemMeta.setLore(plugin.getMessageList("menu.close-item-lore"));
-        closeItem.setItemMeta(closeItemMeta);
-
-        for (Inventory inv : hubInventory) {
-            inv.setItem(slotsCount - 5, closeItem);
+            for (Inventory inv : hubInventory) {
+                inv.setItem(slotsCount - 5, closeItem);
+            }
         }
 
         plugin.emptyHubInventory.addAll(hubInventory);
@@ -136,6 +141,7 @@ public class HubItem implements Listener {
         if (evt.getItem() != null && plugin.hubItem != null && evt.getItem().equals(plugin.hubItem)) {
             new ConfigurationBungee(plugin).menuOpenMessage(evt.getPlayer());
             evt.getPlayer().openInventory(plugin.hubInventory.get(evt.getPlayer()).getFirst());
+            evt.setCancelled(true);
         }
     }
 

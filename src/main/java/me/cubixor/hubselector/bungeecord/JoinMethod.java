@@ -39,7 +39,7 @@ public class JoinMethod {
                     availableAll.addAll(availableVipServers);
 
                     int server = r.nextInt(availableAll.size());
-                    return availableServers.get(server);
+                    return availableAll.get(server);
                 };
             } else if (vipPriority.equalsIgnoreCase("LOW")) {
                 vipJoinMethods = (availableServers, availableVipServers) -> {

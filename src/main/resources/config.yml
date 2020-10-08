@@ -73,12 +73,15 @@ menu-update:
   rate: 10
 
 # Should "close" item be shown at the bottom of menu?
+# Use true or false
 show-menu-close-item: true
 
 # Maximum number of hub inventory rows per page.
+# Use a number between 1 and 5
 max-menu-rows: 5
 
 # If true player will be kicked from server after using /hub command while there is no available hubs.
+# Use true or false
 kick-if-full: true
 
 # All settings connected with hubs menu items.

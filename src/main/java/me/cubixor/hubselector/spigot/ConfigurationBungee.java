@@ -7,12 +7,9 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -25,7 +22,6 @@ import java.util.List;
 public class ConfigurationBungee implements org.bukkit.plugin.messaging.PluginMessageListener, Listener {
 
     private final HubSelector plugin;
-    private boolean configSent;
 
     public ConfigurationBungee(HubSelector hs) {
         plugin = hs;
@@ -67,19 +63,6 @@ public class ConfigurationBungee implements org.bukkit.plugin.messaging.PluginMe
         }
     }
 
-
-    public void getConfigs(Player player) {
-        if (!plugin.getServer().getMessenger().isOutgoingChannelRegistered(plugin, "bungee:config")) {
-            plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "bungee:config");
-        }
-
-        ByteArrayDataOutput output = ByteStreams.newDataOutput();
-        output.writeUTF("GetConfigs");
-        player.sendPluginMessage(plugin, "bungee:config", output.toByteArray());
-
-    }
-
-
     public void getHubInfo(Player player, String server) {
         if (!plugin.getServer().getMessenger().isOutgoingChannelRegistered(plugin, "bungee:hun")) {
             plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "bungee:hub");
@@ -111,21 +94,8 @@ public class ConfigurationBungee implements org.bukkit.plugin.messaging.PluginMe
     }
 
 
-    @EventHandler
-    public void onFirsPlayerJoin(PlayerJoinEvent evt) {
-        if (!plugin.setup && !configSent) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    configSent = true;
-                    getConfigs(evt.getPlayer());
-                }
-            }.runTaskLater(plugin, 1);
-        }
-    }
-
     public void setup() {
-        plugin.hubItem = new ItemStack(Material.getMaterial(plugin.getConfiguration().getString("item.type")));
+        plugin.hubItem = new ItemStack(Material.matchMaterial(plugin.getConfiguration().getString("item.type")));
         ItemMeta hubItemMeta = plugin.hubItem.getItemMeta();
         hubItemMeta.setDisplayName(plugin.getMessage("item.hub-item-name"));
         List<String> hubItemLore = new ArrayList<>(plugin.getMessageList("item.hub-item-lore"));

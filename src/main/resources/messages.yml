@@ -85,6 +85,5 @@ command:
   no-players: "%prefix% &cAt least one person must be connected to the server to perform the reload!"
 
 
-
 # Messages version - DO NOT CHANGE IT!
 messages-version: 1.0
