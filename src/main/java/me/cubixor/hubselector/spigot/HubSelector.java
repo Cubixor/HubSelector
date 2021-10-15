@@ -1,5 +1,9 @@
 package me.cubixor.hubselector.spigot;
 
+import me.cubixor.hubselector.spigot.queue.QueueSetupSpigot;
+import me.cubixor.hubselector.spigot.socket.SocketClient;
+import me.cubixor.hubselector.utils.SocketConnection;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -7,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,25 +19,23 @@ import java.util.List;
 
 public class HubSelector extends JavaPlugin {
 
-    public ItemStack hubItem;
-    public HashMap<Player, LinkedList<Inventory>> hubInventory = new HashMap<>();
-    public HashMap<Inventory, HashMap<Integer, String>> serverSlot = new HashMap<>();
-    public boolean setup;
-    FileConfiguration config;
-    FileConfiguration messagesConfig;
-    LinkedList<Inventory> emptyHubInventory = new LinkedList<>();
+    private static HubSelector instance;
+    private ItemStack hubItem;
+    private HashMap<Player, LinkedList<Inventory>> hubInventory = new HashMap<>();
+    private HashMap<HubMenuPos, String> slot = new HashMap<>();
+    private LinkedList<Inventory> emptyHubInventory = new LinkedList<>();
+    private boolean setup;
+    private FileConfiguration config;
+    private FileConfiguration messagesConfig;
+    private SocketConnection bungeeSocket;
+
+    public static HubSelector getInstance() {
+        return instance;
+    }
 
     @Override
     public void onEnable() {
-        getServer().getPluginManager().registerEvents(new HubItem(this), this);
-        getServer().getPluginManager().registerEvents(new HubMenu(this), this);
-
-
-        ConfigurationBungee configurationBungee = new ConfigurationBungee(this);
-        getServer().getMessenger().registerIncomingPluginChannel(this, "bungee:config", configurationBungee);
-        getServer().getMessenger().registerIncomingPluginChannel(this, "bungee:hub", configurationBungee);
-        getServer().getPluginManager().registerEvents(configurationBungee, this);
-
+        instance = this;
 
         /*new UpdateCheckerSpigot(this, 73688).getVersion(version -> {
             if (!this.getDescription().getVersion().equalsIgnoreCase(version)) {
@@ -40,13 +43,31 @@ public class HubSelector extends JavaPlugin {
             }
         });*/
 
+
+        SetupSpigot setupSpigot = new SetupSpigot();
+        if (getServer().getMaxPlayers() != Integer.MAX_VALUE) {
+            setupSpigot.changeSlots();
+        }
+        setupSpigot.createFile();
+
+        if (!getConfig().getBoolean("queue-server")) {
+            new SocketClient().clientSetup(getConfig().getString("host"), getConfig().getInt("port"), getConfig().getString("server-name"));
+        } else {
+            new QueueSetupSpigot().registerMethods();
+        }
     }
 
     @Override
     public void onDisable() {
-        getServer().getMessenger().unregisterIncomingPluginChannel(this, "bungee:config");
-        getServer().getMessenger().unregisterOutgoingPluginChannel(this, "bungee:config");
-
+        Bukkit.getServer().getScheduler().cancelTasks(this);
+        if (getConfig().getBoolean("queue-server")) {
+            new QueueSetupSpigot().disable();
+        } else {
+            try {
+                getBungeeSocket().getSocket().close();
+            } catch (IOException ignored) {
+            }
+        }
     }
 
     public String getMessage(String path) {
@@ -66,5 +87,61 @@ public class HubSelector extends JavaPlugin {
 
     public FileConfiguration getConfiguration() {
         return config;
+    }
+
+    public void setConfiguration(FileConfiguration config) {
+        this.config = config;
+    }
+
+    public void setMessagesConfig(FileConfiguration messagesConfig) {
+        this.messagesConfig = messagesConfig;
+    }
+
+    public ItemStack getHubItem() {
+        return hubItem;
+    }
+
+    public void setHubItem(ItemStack hubItem) {
+        this.hubItem = hubItem;
+    }
+
+    public HashMap<Player, LinkedList<Inventory>> getHubInventory() {
+        return hubInventory;
+    }
+
+    public void setHubInventory(HashMap<Player, LinkedList<Inventory>> hubInventory) {
+        this.hubInventory = hubInventory;
+    }
+
+    public HashMap<HubMenuPos, String> getSlot() {
+        return slot;
+    }
+
+    public void setSlot(HashMap<HubMenuPos, String> slot) {
+        this.slot = slot;
+    }
+
+    public LinkedList<Inventory> getEmptyHubInventory() {
+        return emptyHubInventory;
+    }
+
+    public void setEmptyHubInventory(LinkedList<Inventory> emptyHubInventory) {
+        this.emptyHubInventory = emptyHubInventory;
+    }
+
+    public boolean isSetup() {
+        return setup;
+    }
+
+    public void setSetup(boolean setup) {
+        this.setup = setup;
+    }
+
+    public SocketConnection getBungeeSocket() {
+        return bungeeSocket;
+    }
+
+    public void setBungeeSocket(SocketConnection bungeeSocket) {
+        this.bungeeSocket = bungeeSocket;
     }
 }

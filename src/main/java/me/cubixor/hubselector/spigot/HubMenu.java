@@ -1,144 +1,128 @@
 package me.cubixor.hubselector.spigot;
 
-import com.google.common.collect.Iterables;
-import org.bukkit.Bukkit;
+import com.cryptomorin.xseries.XMaterial;
+import com.cryptomorin.xseries.XSound;
+import me.cubixor.hubselector.spigot.socket.SocketClientSender;
+import me.cubixor.hubselector.utils.HubData;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class HubMenu implements Listener {
 
     private final HubSelector plugin;
 
-    public HubMenu(HubSelector hs) {
-        plugin = hs;
+    public HubMenu() {
+        plugin = HubSelector.getInstance();
     }
 
+    public static void openMenu(Player player) {
+        HubSelector plugin = HubSelector.getInstance();
+        player.openInventory(plugin.getHubInventory().get(player).getFirst());
+        if (plugin.getConfig().getBoolean("sounds.menu-open.enabled")) {
+            player.playSound(player.getLocation(),
+                    XSound.matchXSound(plugin.getConfiguration().getString("sounds.menu-open.sound")).get().parseSound(),
+                    (float) plugin.getConfiguration().getDouble("sounds.menu-open.volume"),
+                    (float) plugin.getConfiguration().getDouble("sounds.menu-open.pitch"));
+        }
+    }
 
-    public void updateMenuData(HashMap<String, HashMap<InetSocketAddress, List<String>>> servers, Player player) {
-        if (Bukkit.getOnlinePlayers().size() == 0) {
+    public void menuDataSet(LinkedList<HubData> hubDataLinkedList, Player player) {
+        if (!plugin.getHubInventory().containsKey(player)) {
+            new SocketClientSender().menuCloseMessage(player);
             return;
         }
+        int slot = 0;
+        int menu = 0;
+        for (HubData hubData : hubDataLinkedList) {
 
-        if (!plugin.setup) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (plugin.setup) {
-                        menuDataSet(servers, player);
-                        this.cancel();
-                    }
-                }
-            }.runTaskTimer(plugin, 0, 1);
-        } else {
-            menuDataSet(servers, player);
-        }
+            ItemStack hubItem = matchServerItem(hubData);
 
-    }
+            plugin.getHubInventory().get(player).get(menu).setItem(slot, hubItem);
+            plugin.getSlot().put(new HubMenuPos(menu, slot), hubData.getServer());
 
-    private void menuDataSet(HashMap<String, HashMap<InetSocketAddress, List<String>>> servers, Player player) {
-
-        int slot = -1;
-        int menu = 1;
-        for (String server : servers.keySet()) {
-            slot++;
-
-            ItemStack serverItem = null;
-
-            InetSocketAddress ip = Iterables.getFirst(servers.get(server).keySet(), null);
-
-            boolean online = checkOnline(ip.getHostName(), ip.getPort());
-
-            List<String> playerList = new ArrayList<>(servers.get(server).get(Iterables.getFirst(servers.get(server).keySet(), null)));
-            int playerCountInt = playerList.size();
-
-            int slots = plugin.getConfiguration().getInt("hub-servers." + server + ".slots");
-
-            boolean vip = plugin.getConfiguration().getBoolean("hub-servers." + server + ".vip");
-
-
-            if (!online) {
-                serverItem = setItem("offline", server, "offline-hub-item-lore", playerCountInt, slots);
-            }
-
-
-            if (playerCountInt >= slots && serverItem == null) {
-                serverItem = setItem("full", server, "full-hub-item-lore", playerCountInt, slots);
-            }
-
-            if (serverItem == null) {
-                serverItem = setItem("regular", server, "hub-item-lore", playerCountInt, slots);
-            }
-
-
-            boolean current = playerList.contains(player.getName());
-            if (vip) {
-                if (!online) {
-                    serverItem = setItem("vip", server, "offline-hub-item-lore", playerCountInt, slots);
-                }
-                if (current) {
-                    serverItem = setItem("vip", server, "vip-hub-item-lore-current", playerCountInt, slots);
-                }
-                if (online && !current) {
-                    serverItem = setItem("vip", server, "vip-hub-item-lore", playerCountInt, slots);
-                }
-            }
-
-            if (current && !vip) {
-                serverItem = setItem("current", server, "current-hub-item-lore", playerCountInt, slots);
-            }
-
-
-            plugin.hubInventory.get(player).get(menu - 1).setItem(slot, serverItem);
-
-            HashMap<Integer, String> serverPos = new HashMap<>();
-            if (plugin.serverSlot.get(plugin.hubInventory.get(player).get(menu - 1)) != null) {
-                serverPos.putAll(plugin.serverSlot.get(plugin.hubInventory.get(player).get(menu - 1)));
-            }
-            serverPos.put(slot, server);
-            plugin.serverSlot.put(plugin.hubInventory.get(player).get(menu - 1), serverPos);
-
-
-            if (plugin.hubInventory.get(player).get(menu - 1).getSize() - 10 == slot) {
+            if (plugin.getEmptyHubInventory().size() > 1 && plugin.getHubInventory().get(player).get(menu).getSize() - 10 == slot) {
                 menu++;
-                slot = -1;
+                slot = 0;
+            } else {
+                slot++;
             }
         }
+        player.updateInventory();
     }
 
-    private boolean checkOnline(String ip, int port) {
-        try {
-            Socket s = new Socket();
-            s.connect(new InetSocketAddress(ip, port), 20);
-            s.close();
-            return true;
-        } catch (Exception e) {
-            return false;
+    private ItemStack matchServerItem(HubData hubData) {
+        ItemStack serverItem;
+
+        if (hubData.isVip()) {
+            if (!hubData.isOnline()) {
+                serverItem = setItem("offline", "vip-offline-hub-lore", hubData);
+                return serverItem;
+            }
+            if (hubData.isCurrent()) {
+                serverItem = setItem("vip", "vip-current-hub-lore", hubData);
+                return serverItem;
+            }
+            if (!hubData.isActive()) {
+                serverItem = setItem("inactive", "vip-inactive-hub-lore", hubData);
+                return serverItem;
+            }
+            if (!hubData.isPlayerVip()) {
+                serverItem = setItem("vip", "vip-no-permission-hub-lore", hubData);
+                return serverItem;
+            }
+            if (hubData.isFull()) {
+                serverItem = setItem("vip", "vip-full-hub-lore", hubData);
+                return serverItem;
+            }
+            serverItem = setItem("vip", "vip-hub-lore", hubData);
+        } else {
+            if (!hubData.isOnline()) {
+                serverItem = setItem("offline", "offline-hub-lore", hubData);
+                return serverItem;
+            }
+            if (hubData.isCurrent()) {
+                serverItem = setItem("current", "current-hub-lore", hubData);
+                return serverItem;
+            }
+            if (!hubData.isActive()) {
+                serverItem = setItem("inactive", "inactive-hub-lore", hubData);
+                return serverItem;
+            }
+            if (hubData.isFull()) {
+                serverItem = setItem("full", "full-hub-lore", hubData);
+                return serverItem;
+            }
+
+            serverItem = setItem("regular", "regular-hub-lore", hubData);
         }
+
+        return serverItem;
     }
 
 
-    private ItemStack setItem(String hubItemMaterial, String hubItemName, String hubItemLore, Integer players, Integer slots) {
-        ItemStack item = new ItemStack(Material.getMaterial(plugin.getConfiguration().getString("menu-items." + hubItemMaterial)), 1);
+    private ItemStack setItem(String hubItemMaterial, String hubItemLore, HubData hubData) {
+        int players = hubData.getPlayers().size();
+        int slots = hubData.getSlots();
+
+        ItemStack item = new ItemStack(
+                XMaterial.matchXMaterial(plugin.getConfiguration().getString("menu-items." + hubItemMaterial)).get().parseItem());
         ItemMeta itemMeta = item.getItemMeta();
         List<String> itemLore = new ArrayList<>(plugin.getMessageList("menu." + hubItemLore));
         List<String> itemLoreFinal = new ArrayList<>();
 
-        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("hub-servers." + hubItemName + ".name")));
+        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', hubData.getName()));
         for (String s : itemLore) {
-            itemLoreFinal.add(s.replace("%players%", players.toString()).replace("%max%", slots.toString()));
+            itemLoreFinal.add(s.replace("%players%", Integer.toString(players)).replace("%max%", Integer.toString(slots)));
         }
         itemMeta.setLore(itemLoreFinal);
         item.setItemMeta(itemMeta);
@@ -149,38 +133,54 @@ public class HubMenu implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent evt) {
-        if (evt.getCurrentItem() != null && evt.getClickedInventory() != null && plugin.hubInventory.get(evt.getWhoClicked()).contains(evt.getClickedInventory())) {
+        if (evt.getCurrentItem() != null && evt.getClickedInventory() != null &&
+                plugin.getHubInventory().get((Player) evt.getWhoClicked()).contains(evt.getClickedInventory())) {
+
+            Player player = (Player) evt.getWhoClicked();
 
             evt.setCancelled(true);
-            evt.getWhoClicked().closeInventory();
 
-            if (plugin.serverSlot.get(evt.getInventory()).get(evt.getSlot()) != null) {
-                Player player = (Player) evt.getWhoClicked();
-                String server = plugin.serverSlot.get(evt.getInventory()).get(evt.getSlot());
-
-                new ConfigurationBungee(plugin).getHubInfo(player, server);
+            int inventorySlot = evt.getSlot();
+            int inventoryId = getInventoryId(player, evt.getClickedInventory());
+            String server = plugin.getSlot().get(new HubMenuPos(inventoryId, inventorySlot));
+            if (server != null) {
+                new SocketClientSender().getHubInfo(player, server);
+                player.closeInventory();
                 return;
             }
-            int invSlots = plugin.hubInventory.get(evt.getWhoClicked()).getFirst().getSize();
-            int inventoryNumber = 0;
 
-            for (int i = 0; i <= plugin.hubInventory.get(evt.getWhoClicked()).size() - 1; i++) {
-                if (plugin.hubInventory.get(evt.getWhoClicked()).get(i).equals(evt.getClickedInventory())) {
-                    inventoryNumber = i;
+
+            int invSlots = plugin.getEmptyHubInventory().getFirst().getSize();
+
+            if (plugin.getHubInventory().get(player).size() > 1 && evt.getSlot() == invSlots - 4) {
+                evt.getWhoClicked().openInventory(plugin.getHubInventory().get(player).get(inventoryId + 1));
+                if (plugin.getConfiguration().getBoolean("sounds.menu-change-page.enabled")) {
+                    player.playSound(player.getLocation(),
+                            XSound.matchXSound(plugin.getConfiguration().getString("sounds.menu-change-page.sound")).get().parseSound(),
+                            (float) plugin.getConfiguration().getDouble("sounds.menu-change-page.volume"),
+                            (float) plugin.getConfiguration().getDouble("sounds.menu-change-page.pitch"));
                 }
+            } else if (plugin.getHubInventory().get(player).size() > 1 && evt.getSlot() == invSlots - 6) {
+                evt.getWhoClicked().openInventory(plugin.getHubInventory().get(player).get(inventoryId - 1));
+                if (plugin.getConfig().getBoolean("sounds.menu-change-page.enabled")) {
+                    player.playSound(player.getLocation(),
+                            XSound.matchXSound(plugin.getConfiguration().getString("sounds.menu-change-page.sound")).get().parseSound(),
+                            (float) plugin.getConfiguration().getDouble("sounds.menu-change-page.volume"),
+                            (float) plugin.getConfiguration().getDouble("sounds.menu-change-page.pitch"));
+                }
+            } else {
+                player.closeInventory();
             }
-
-
-            if (evt.getSlot() == invSlots - 4) {
-                evt.getWhoClicked().openInventory(plugin.hubInventory.get(evt.getWhoClicked()).get(inventoryNumber + 1));
-                return;
-            }
-
-            if (evt.getSlot() == invSlots - 6) {
-                evt.getWhoClicked().openInventory(plugin.hubInventory.get(evt.getWhoClicked()).get(inventoryNumber - 1));
-            }
-
         }
+    }
+
+    private int getInventoryId(Player player, Inventory currentInventory) {
+        for (int i = 0; i <= plugin.getHubInventory().get(player).size() - 1; i++) {
+            if (plugin.getHubInventory().get(player).get(i).equals(currentInventory)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 }

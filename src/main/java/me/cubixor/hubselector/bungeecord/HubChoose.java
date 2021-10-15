@@ -1,177 +1,172 @@
 package me.cubixor.hubselector.bungeecord;
 
+import me.cubixor.hubselector.bungeecord.queue.QueueMainBungee;
+import me.cubixor.hubselector.bungeecord.queue.QueueUtils;
+import me.cubixor.hubselector.utils.Hub;
+import me.cubixor.hubselector.utils.PermissionUtils;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.LinkedList;
+import java.util.List;
 
 public class HubChoose {
 
     HubSelectorBungee plugin;
 
-
-    public HubChoose(HubSelectorBungee hsb) {
-        plugin = hsb;
+    public HubChoose() {
+        plugin = HubSelectorBungee.getInstance();
     }
 
-    public String connectToHub(ProxiedPlayer player, boolean vipPlayer, boolean command) {
+    public static String chooseServer(ProxiedPlayer player, boolean kickIfFull, boolean kick, boolean bypass) {
+        HubSelectorBungee plugin = HubSelectorBungee.getInstance();
 
-        if (isInHub(player)) {
-            return null;
+        if (QueueUtils.queueAvailable() && (QueueMainBungee.getInstance().isQueuePaused() && !bypass)) {
+            return plugin.getHubServers().getString("queue-server");
         }
 
-        List<String> hubServers = new ArrayList<>(plugin.getConfig().getSection("hub-servers").getKeys());
         LinkedList<String> availableServers = new LinkedList<>();
         LinkedList<String> availableVipServers = new LinkedList<>();
 
+        for (Hub hub : plugin.getHubs()) {
+            //System.out.println(hub.toString());
 
-        for (String server : hubServers) {
-
-            if (!checkIfAvailable(server, vipPlayer, player)) {
-                continue;
-            }
-
-            if (checkIfVip(server)) {
-                availableVipServers.add(server);
+            if (!bypass) {
+                if (!HubUtils.checkIfAvailable(hub, player, true)) {
+                    continue;
+                }
             } else {
-                availableServers.add(server);
+                if (!HubUtils.checkIfOnline(hub)) {
+                    continue;
+                }
             }
-        }
 
-        if ((availableServers.size() == 0 && !vipPlayer) || (availableVipServers.size() == 0 && vipPlayer && availableServers.size() == 0)) {
-            if (!plugin.getConfig().getBoolean("kick-if-full") && command) {
-                player.sendMessage(plugin.getMessage("connect.full"));
+            if (hub.isVip()) {
+                availableVipServers.add(hub.getServer());
             } else {
-                player.disconnect(plugin.getMessage("join.kick-full"));
+                availableServers.add(hub.getServer());
             }
-            return null;
         }
 
+        boolean vipPlayer = PermissionUtils.hasPermission(player, "hub.vip") || bypass;
 
-        String chosenServer;
 
-        if (vipPlayer) {
-            chosenServer = plugin.vipJoinMethodsInstance.method(availableServers, availableVipServers);
-        } else {
-            chosenServer = plugin.joinMethodsInstance.method(availableServers);
+        if ((availableServers.isEmpty() && !vipPlayer) || (availableVipServers.isEmpty() && vipPlayer && availableServers.isEmpty())) {
+            if (HubUtils.canBypassFull(player) || HubUtils.canBypassInactive(player)) {
+                for (Hub hub : plugin.getHubs()) {
+                    if (HubUtils.checkIfAvailable(hub, player)) {
+                        if (hub.isVip()) {
+                            availableVipServers.add(hub.getServer());
+                        } else {
+                            availableServers.add(hub.getServer());
+                        }
+                    }
+                }
+                if (!((availableServers.isEmpty() && !vipPlayer) || (availableVipServers.isEmpty() && vipPlayer && availableServers.isEmpty()))) {
+                    return getMethod(vipPlayer, availableServers, availableVipServers);
+                }
+            }
+            if (QueueUtils.queueAvailable()) {
+/*
+                if (!QueueUtils.isInQueue(player)) {
+                    new QueueUtils().putInQueue(player);
+                }
+*/
+                return plugin.getHubServers().getString("queue-server");
+            } else {
+                if (!kick) {
+                    if (kickIfFull) {
+                        player.disconnect(plugin.getMessage("connect.kick-full"));
+                    } else {
+                        player.sendMessage(plugin.getMessage("connect.full"));
+                    }
+                }
+                return null;
+            }
+
         }
-
-
-        return chosenServer;
+        return getMethod(vipPlayer, availableServers, availableVipServers);
     }
 
-    public void chooseHub(ProxiedPlayer player, String target, String server, boolean vip) {
-        if (plugin.getProxy().getPlayer(target) == null) {
+    public static String getMethod(boolean vip, List<String> availableServers, List<String> availableVipServers) {
+        HubSelectorBungee plugin = HubSelectorBungee.getInstance();
+        if (vip) {
+            return plugin.getVipJoinMethodsInstance().method(availableServers, availableVipServers);
+        } else {
+            return plugin.getJoinMethodsInstance().method(availableServers);
+        }
+
+    }
+
+
+    public void connectToSpecifiedHub(ProxiedPlayer player, String targetPlayerName, String server) {
+        ProxiedPlayer targetPlayer = plugin.getProxy().getPlayer(targetPlayerName);
+        Hub hub = HubUtils.getHub(server);
+
+        if (hub == null && !server.equalsIgnoreCase("*")) {
+            player.sendMessage(plugin.getMessage("command.invalid-hub"));
+            return;
+        }
+
+        if (targetPlayer == null) {
             player.sendMessage(plugin.getMessage("command.invalid-player"));
             return;
         }
 
-        if (server.equalsIgnoreCase("*")) {
-            if (isInHub(player)) {
+        if (player.getName().equals(targetPlayerName)) {
+            if (HubUtils.checkIfCooldown(player)) {
                 return;
             }
-            connectToHub(player, vip, true);
+        }
+
+        if (server.equalsIgnoreCase("*")) {
+            if (targetPlayer.equals(player)) {
+                connectToHub(targetPlayer, true, false);
+            } else {
+                if (connectToHub(targetPlayer, false, false)) {
+                    player.sendMessage(plugin.getMessage("connect.success-player", new String[]{"%hub%", "%player%"}, new String[]{"*", targetPlayerName}));
+                } else {
+                    player.sendMessage(plugin.getMessage("connect.failure-player", "%player%", targetPlayerName));
+                }
+            }
             return;
         }
 
-        boolean available = checkIfAvailable(server, vip, plugin.getProxy().getPlayer(target));
+        new HubInventory().inventoryClickData(player, targetPlayer, hub, false);
 
-        if (available) {
-            player.sendMessage(plugin.getMessage("connect.success", server));
-            plugin.getProxy().getPlayer(target).connect(plugin.getProxy().getServerInfo(server));
-        } else {
-            player.sendMessage(plugin.getMessage("command.invalid-hub"));
-        }
     }
 
-    public void hubCheck(ProxiedPlayer player, boolean vip) {
-        if (isInHub(player)) {
-            return;
+    public boolean connectToHub(ProxiedPlayer player, boolean msg, boolean bypass) {
+        if (HubUtils.isInHub(player, msg)) {
+            return false;
         }
-
-        String server = connectToHub(player, vip, true);
+        String server = chooseServer(player, plugin.getConfig().getBoolean("kick-if-full"), false, bypass);
 
         if (server != null) {
-            player.sendMessage(plugin.getMessage("connect.success", server));
-            player.connect(plugin.getProxy().getServerInfo(server));
-        }
-
-    }
-
-    private boolean isInHub(ProxiedPlayer player) {
-        List<String> hubServers = new ArrayList<>(plugin.getConfig().getSection("hub-servers").getKeys());
-
-        for (String s : hubServers) {
-            if (plugin.getProxy().getServerInfo(s) != null && plugin.getProxy().getServerInfo(s).getPlayers().contains(player)) {
-                player.sendMessage(plugin.getMessage("command.already-in-hub"));
+            Hub hub = HubUtils.getHub(server);
+            if (hub != null) {
+                if (QueueUtils.isInQueue(player)) {
+                    QueueMainBungee queue = QueueMainBungee.getInstance();
+                    if (plugin.getQueueServer().getPlayers().size() > 1) {
+                        queue.getJoinTimes().add(LocalDateTime.now());
+                    } else {
+                        queue.getJoinTimes().clear();
+                    }
+                }
+                sendToServer(player, HubUtils.getServerInfo(hub));
                 return true;
+            } else if (QueueUtils.queueAvailable() && plugin.getQueueServer().getName().equals(server) && !player.getServer().getInfo().equals(plugin.getQueueServer())) {
+                player.connect(plugin.getQueueServer());
             }
         }
         return false;
     }
 
-    public boolean checkIfOnline(String ip, int port) {
-        try {
-            Socket s = new Socket();
-            s.connect(new InetSocketAddress(ip, port), 20);
-            s.close();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public void sendToServer(ProxiedPlayer player, ServerInfo serverInfo) {
+        player.connect(serverInfo);
+        plugin.getServerSlots().get(serverInfo.getName()).add(player.getName());
+        System.out.println("sendToServer " + plugin.getServerSlots());
+        player.sendMessage(plugin.getMessage("connect.success", "%hub%", HubUtils.getHub(serverInfo.getName()).getName()));
     }
-
-    public boolean checkIfFull(String server) {
-        return plugin.getProxy().getServerInfo(server).getPlayers().size() >= plugin.getConfig().getInt("hub-servers." + server + ".slots");
-    }
-
-    public boolean checkIfVip(String server) {
-        return plugin.getConfig().getBoolean("hub-servers." + server + ".vip");
-    }
-
-    public LinkedHashMap<String, Integer> sortByValue(HashMap<String, Integer> hm) {
-        List<Map.Entry<String, Integer>> list =
-                new LinkedList<Map.Entry<String, Integer>>(hm.entrySet());
-
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-            public int compare(Map.Entry<String, Integer> o1,
-                               Map.Entry<String, Integer> o2) {
-                return (o1.getValue()).compareTo(o2.getValue());
-            }
-        });
-
-        LinkedHashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
-        for (Map.Entry<String, Integer> aa : list) {
-            temp.put(aa.getKey(), aa.getValue());
-        }
-        return temp;
-    }
-
-    public boolean checkIfAvailable(String server, boolean vipPlayer, ProxiedPlayer player) {
-        InetSocketAddress serverAddress = plugin.getProxy().getServerInfo(server).getAddress();
-
-        boolean online = checkIfOnline(serverAddress.getHostName(), serverAddress.getPort());
-
-        if (!online) {
-            return false;
-        }
-
-        boolean full = checkIfFull(server);
-
-        if (full) {
-            return false;
-        }
-
-        boolean current = plugin.getProxy().getServerInfo(server).getPlayers().contains(player);
-
-        if (current) {
-            return false;
-        }
-
-        boolean vip = checkIfVip(server);
-
-        return vipPlayer || !vip;
-    }
-
 }

@@ -1,32 +1,9 @@
 # HubSelector - config.yml v1.0
 
-
-# Servers that are hubs.
-#
-#  hub: - Server name set in bungeecord config.yml. WARNING! This name and name in "servers" category in bungeecord config MUST BE THE SAME!
-#    name: "&3&lHub x" - Hub name displayed in hub menu.
-#    slots: 50 - Hub slots. WARNING! Server slots amount set in server.properties file must be higher than value set here!
-#    vip: false - If true hub will be available only for players with hub.vip permission.
-#
-# Example:
-#  nameFromBungeeConfig:
-#    name: "&3&lName displayed in menu"
-#    slots: 100
-#    vip: false
-hub-servers:
-  hub1:
-    name: "&3&lHub 1"
-    slots: 50
-    vip: false
-  hub2:
-    name: "&3&lHub 2"
-    slots: 50
-    vip: false
-  hub3:
-    name: "&6&lVIP Hub 3"
-    slots: 50
-    vip: true
-
+# Socket server is used to communicate between spigot and bungee servers.
+# Socket server port is a port that socket server will be started on.
+# It can be any free port.
+socket-server-port: 3000
 
 # The way that players are placed on hub when they join.
 #
@@ -49,9 +26,52 @@ hub-choose-method: LEAST-PLAYERS
 #
 vip-priority: HIGH
 
+# Queue related settings
+queue:
+
+  # Should plugin use queue feature?
+  use-queue: true
+
+  # Commands that are allowed to be used while in queue.
+  allowed-commands:
+    - help
+    - spawn
+
+  # Enable or disable queue bossbar
+  # Remember that boss bar won't work if your server is using 1.8 version, and you have to disable it here!
+  bossbar-enabled: true
+
+  # Set how often boss bar message will change. [seconds]
+  bossbar-change-rate: 5
+
+  # Queue priority ranks
+  # Add as many if you want
+  # Players that have permission with lower priority value will be put in the queue before players with higher priority value
+  #
+  # test - rank name, it can be anything except 'default'
+  # permission - permission which determines player queue rank
+  # priority - queue priority value can be any number between 1 and 9999
+  #
+  # Template to copy:
+  # test:
+  #   permission: hub.queue.test
+  #   priority: 2
+  ranks:
+    admin:
+      permission: hub.queue.admin
+      priority: 0
+      name: "&c&lADMIN"
+    vip:
+      permission: hub.queue.vip
+      priority: 1
+      name: "&6&lVIP"
+
 
 # All settings connected with hub selector item.
 item:
+
+  # Should players have the hub item in inventory while in hub?
+  show: true
 
   # Slot in which hub selector item will appear.
   # The slot counting starts from zero, so the first slot number is 0, next is 1 and so on.
@@ -65,24 +85,55 @@ item:
 menu-update:
 
   # If true, hubs menu will be updated only when opened.
-  # If false hubs data displayed in hub menu (players, slots, hub state) will be updated every number of seconds set in "rate" section.
+  # If false hubs' data displayed in hub menu (players, slots, hub state) will be updated every number of seconds set in "rate" section.
   update-on-open-only: false
 
   # Set how often (in seconds) menu will update (player count, slots, hub state).
   # It matters only when "update-on-open-only" is set to "false".
-  rate: 10
+  rate: 2
 
-# Should "close" item be shown at the bottom of menu?
-# Use true or false
+# Should "close" item be shown at the bottom of menu? [true/false]
 show-menu-close-item: true
 
-# Maximum number of hub inventory rows per page.
+# Maximum number of hub inventory rows per page. [1-5]
 # Use a number between 1 and 5
 max-menu-rows: 5
 
-# If true player will be kicked from server after using /hub command while there is no available hubs.
-# Use true or false
+# If true player will be kicked from server after using /hub command while there is no available hubs and queue is disabled/unavailable. [true/false]
 kick-if-full: true
+
+# Hub change cooldown. Use it to prevent players from spamming. [true/false]
+change-cooldown: 10
+
+# All sounds used by plugin.
+#
+# Fields explanation:
+# enabled - should sound be enabled. Use true/false
+# sound - sound from the list: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
+#      Remember that it's a list for the latest spigot version, older versions may not contain some of these sounds.
+# volume - sound volume. It also changes the distance from which player can hear the sound.
+# pitch - sound pitch. Use any number from 0.0 to 2.0.
+sounds:
+  hub-not-available:
+    enabled: true
+    sound: ENTITY_GENERIC_BURN
+    volume: 0.3
+    pitch: 1
+  hub-connect:
+    enabled: true
+    sound: BLOCK_ANVIL_LAND
+    volume: 0.3
+    pitch: 2
+  menu-open:
+    enabled: true
+    sound: UI_BUTTON_CLICK
+    volume: 0.1
+    pitch: 1
+  menu-change-page:
+    enabled: true
+    sound: UI_BUTTON_CLICK
+    volume: 0.1
+    pitch: 1
 
 # All settings connected with hubs menu items.
 # ALl available item types are here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
@@ -100,9 +151,11 @@ menu-items:
   # Item used to display a vip hub.
   vip: MAGMA_CREAM
 
-  # Item used to display an inactive (turned off) hub.
+  # Item used to display an offline hub.
   offline: RED_DYE
 
+  # Item used to display an inactive hub.
+  inactive: CLAY_BALL
 
   # Item used to close menu.
   menu-close: BARRIER
@@ -116,8 +169,3 @@ menu-items:
 
 # Config version - DO NOT CHANGE IT!
 config-version: 1.0
-
-
-
-
-

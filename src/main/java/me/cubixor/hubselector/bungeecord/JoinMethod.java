@@ -1,17 +1,24 @@
 package me.cubixor.hubselector.bungeecord;
 
-
 import java.util.*;
+
+interface JoinMethods {
+    String method(List<String> availableServers);
+}
+
+interface VipJoinMethods {
+    String method(List<String> availableServers, List<String> availableVipServers);
+}
 
 public class JoinMethod {
 
     HubSelectorBungee plugin;
 
-    public JoinMethod(HubSelectorBungee hsb) {
-        plugin = hsb;
+    public JoinMethod() {
+        plugin = HubSelectorBungee.getInstance();
     }
 
-    public void joinMethodSetup() {
+    public void setupJoinMethod() {
         String method = plugin.getConfig().getString("hub-choose-method");
         String vipPriority = plugin.getConfig().getString("vip-priority");
 
@@ -180,25 +187,21 @@ public class JoinMethod {
 
         }
 
-        plugin.joinMethodsInstance = joinMethods;
-        plugin.vipJoinMethodsInstance = vipJoinMethods;
+        plugin.setJoinMethodsInstance(joinMethods);
+        plugin.setVipJoinMethodsInstance(vipJoinMethods);
 
     }
 
-    private LinkedHashMap<String, Integer> sortByValue(HashMap<String, Integer> hm) {
-        List<Map.Entry<String, Integer>> list =
-                new LinkedList<Map.Entry<String, Integer>>(hm.entrySet());
+    private LinkedHashMap<String, Integer> sortByValue(HashMap<String, Integer> hashMap) {
+        LinkedHashMap<String, Integer> temp = new LinkedHashMap<>();
 
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                return (o1.getValue()).compareTo(o2.getValue());
-            }
-        });
+        hashMap.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue())
+                .forEachOrdered(x -> temp.put(x.getKey(), x.getValue()));
 
-        LinkedHashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
-        for (Map.Entry<String, Integer> aa : list) {
-            temp.put(aa.getKey(), aa.getValue());
-        }
+        System.out.println(temp);
+
         return temp;
     }
 
@@ -222,13 +225,5 @@ public class JoinMethod {
             availableAllHash.put(s, plugin.getProxy().getServerInfo(s).getPlayers().size());
         }
         return sortByValue(availableAllHash);
-    }
-
-    interface JoinMethods {
-        String method(List<String> availableServers);
-    }
-
-    interface VipJoinMethods {
-        String method(List<String> availableServers, List<String> availableVipServers);
     }
 }

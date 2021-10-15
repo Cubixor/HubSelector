@@ -1,0 +1,45 @@
+# HubSelector - hub-servers.yml v1.0
+#
+#  WARNING! You can change all values in this config (hub names, slots, vip and active states) using commands in-game.
+#  You DON'T HAVE TO edit this file and restart the server everytime you want to change them.
+
+
+#  hub: - Server name set in bungeecord config.yml. WARNING! This name and name in "servers" category in bungeecord config MUST MATCH!
+#    name: "&3&lHub x" - Hub name displayed in hub menu.
+#    slots: 50 - Hub slots. WARNING! Server slots amount set in server.properties file must be higher than value set here!
+#    vip: false - If true hub will be available only for players with hub.vip permission.
+#    active: true - If true hub will be active and available for players.
+#
+# Example:
+#  nameFromBungeeConfig:
+#    name: "&3&lName displayed in menu"
+#    slots: 100
+#    vip: false
+#    active: true
+
+hub-servers:
+  hub1:
+    name: "&3&lHub 1"
+    slots: 50
+    vip: false
+    active: true
+  hub2:
+    name: "&3&lHub 2"
+    slots: 50
+    vip: false
+    active: true
+  hub3:
+    name: "&6&lVIP Hub 3"
+    slots: 50
+    vip: true
+    active: true
+
+
+# Queue server name. WARNING! This name and name in "servers" category in bungeecord config MUST BE THE SAME!
+# You don't have to change it if you aren't using queue feature.
+queue-server: queue
+
+
+# Queue state (paused or not).
+# It's used to store queue server state, you can change it using /hs pausequeue <true/false> command.
+queue-paused: false

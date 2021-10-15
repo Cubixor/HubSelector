@@ -1,24 +1,5 @@
 name: HubSelector
 main: me.cubixor.hubselector.spigot.HubSelector
 version: ${project.version}
-api-version: 1.16
+api-version: 1.13
 author: Cubixor
-permissions:
-  hub.vip:
-    description: Join vip hubs
-    default: op
-  hub.use:
-    description: Use /hub command
-    default: not op
-  hub.choose:
-    description: Use /hub <hub_name> command
-    default: true
-  hub.choose.others:
-    description: Use /hub <hub_name> <player> command
-    default: op
-  hub.help:
-    description: Use /hubselector command
-    default: true
-  hub.reload:
-    description: Use /hubselector reload command
-    default: op

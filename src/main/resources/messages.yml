@@ -1,4 +1,6 @@
-prefix: "&d&lHubSelector &7&l»&r"
+# HubSelector - messages.yml v1.0
+
+prefix: "&d&lHub &7&l»&r"
 
 item:
   hub-item-name: "&9&lSelect hub"
@@ -6,36 +8,56 @@ item:
     - "&7Click to open hub menu"
     - "&7and choose the hub you"
     - "&7want to teleport to!"
-
 menu:
   hub-menu-name: "&9&lSelect hub"
-  vip-hub-item-lore:
+  vip-hub-lore:
     - "&cAvailable only for VIP's!"
     - ""
     - "&ePlayers: %players%/%max%"
     - ""
     - "&aClick to join!"
-  vip-hub-item-lore-current:
+  vip-offline-hub-lore:
     - "&cAvailable only for VIP's!"
     - ""
-    - "&ePlayers: %players%/%max%"
+    - "&cThis hub is offline!"
+  vip-full-hub-lore:
+    - "&cAvailable only for VIP's!"
     - ""
-    - "&cYou are in this hub!"
-  hub-item-lore:
-    - "&ePlayers: %players%/%max%"
-    - ""
-    - "&aClick to join!"
-  offline-hub-item-lore:
-    - "&cOffline!"
-  full-hub-item-lore:
     - "&ePlayers: %players%/%max%"
     - ""
     - "&cThis hub is full!"
-  current-hub-item-lore:
+  vip-current-hub-lore:
+    - "&cAvailable only for VIP's!"
+    - ""
     - "&ePlayers: %players%/%max%"
     - ""
     - "&cYou are in this hub!"
-
+  vip-inactive-hub-lore:
+    - "&cAvailable only for VIP's!"
+    - ""
+    - "&cThis hub is inactive!"
+  vip-no-permission-hub-lore:
+    - "&cAvailable only for VIP's!"
+    - ""
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&cYou have to be VIP to join this hub!"
+  regular-hub-lore:
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&aClick to join!"
+  offline-hub-lore:
+    - "&cThis hub is offline!"
+  inactive-hub-lore:
+    - "&cThis hub is inactive!"
+  full-hub-lore:
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&cThis hub is full!"
+  current-hub-lore:
+    - "&ePlayers: %players%/%max%"
+    - ""
+    - "&cYou are in this hub!"
   close-item-name: "&cClose"
   close-item-lore:
     - "&7Close this menu"
@@ -45,45 +67,102 @@ menu:
   previous-page-item-name: "&ePrevious page"
   previous-page-item-lore:
     - "&7Go to the previous page"
-
 connect:
   hub-offline: "%prefix% &cThis hub is offline!"
   hub-full: "%prefix% &cThis hub is full!"
   hub-current: "%prefix% &cYou are already connected to this hub!"
   hub-vip: "%prefix% &cYou need to be a VIP to join this hub!"
+  hub-inactive: "%prefix% &cThis hub is inactive!"
   full: "%prefix% &cAll hub servers are full! Please try again later."
-  success: "%prefix% &7Connecting to hub %hub%&7..."
-
-
-join:
-  kick-full: "&cThere are no available hub servers now! Please try again later!"
-
-
+  cooldown: "%prefix% &cToo fast!"
+  success: "%prefix% &7Connecting to hub &e&l%hub%"
+  success-player: "%prefix% &7Connecting player &e%player% &7to hub &e&l%hub%"
+  failure-player: "%prefix% &7Couldn't find a hub for player &e%player%&7. Maybe he is already in hub?"
+  kick-full: "&d&lYourServer &7» &7Lost connection \n \n \n &cNo lobby servers available! \n &cPlease try again later! \n \n \n &7Website: &eyourserver.com \n &7Discord: &ediscord.gg/yourserver"
+  kick-stopped: "&d&lYourServer &7» &7Lost connection \n \n \n &cServer was stopped! \n &cWe will be back online soon! \n \n \n &7Website: &eyourserver.com \n &7Discord: &ediscord.gg/yourserver"
+  join: "&7[&a&l+&7] %player%"
+  leave: "&7[&c&l-&7] %player%"
+  join-vip: "&e&l%player% &7joined the lobby."
+  leave-vip: "&e&l%player% &7left the lobby."
+  queue: "%prefix% &7You were queued as no hubs were found for you."
 command:
   help:
     - "&m-----&r&d&lHubSelector&f&m-----"
     - ""
-    - " &7- &e/hubselector (/hubselector help) &7- Display this help page (hub.help)"
-    - " &7- &e/hubselector reload &7- Reload all configs (hub.reload)"
-    - " &7- &e/hub &7- Teleport to hub (hub.use)"
-    - " &7- &e/hub <hub_name> &7- Teleport to chosen hub (hub.choose)"
-    - " &7- &e/hub <hub_name> <player> &7- Teleport specific player to chosen hub (hub.choose)"
+    - " &7- &e/hub &7- Teleport to hub"
+    - " &7- &e/hub <hub_name> &7- Teleport to specified hub"
+    - " &7- &e/hub <hub_name> <player> &7- Teleport specified player to specified hub"
+    - " &7- &e/hs (/hs help) &7- Display this help page"
+    - " &7- &e/hs reload &7- Reload the plugin"
+    - " &7- &e/hs setname <hub> <name> &7- Change hub's name"
+    - " &7- &e/hs setslots <hub> <slots> &7- Change hub's slots"
+    - " &7- &e/hs setactive <hub> <true/false> &7- Change hub's state"
+    - " &7- &e/hs setvip <hub> <true/false> &7- Change hub's vip state"
+    - " &7- &e/hs kick <hub> &7- Kick all players from the hub"
+    - " &7- &e/hs pausequeue <true/false> &7- Pause or resume queue"
+    - " &7- &e/hs skipqueue <player> &7- Make the player skip the queue"
+    - " &7- &e/hs menu [player] &7- Open hubs menu"
     - ""
-    - "&7You can use * instead of hub name to teleport to random hub."
-    - "&7You can use /hs instead of /hubselector and /lobby instead of hub"
+    - "&7You can use &e* &7instead of hub name to teleport to random hub."
+    - "&7You can use &e/hs &7instead of &e/hubselector &7and &e/lobby &7instead of &e/hub"
     - "&m---------------------"
   not-player: "%prefix% &cYou have to be player to execute this command!"
   invalid-player: "%prefix% &cThere is no player with that nickname!"
-  invalid-hub: "%prefix% &cThis hub is not available now!"
+  invalid-hub: "%prefix% &cThere is no hub with that name!"
+  not-in-hub: "%prefix% &cThis player is not in hub!"
   already-in-hub: "%prefix% &cYou are already in server hub!"
-  usage: "%prefix% &cThis command does not require any arguments! &7Use just /hub or /lobby!"
-  usage-choose: "%prefix% &cWrong usage! &7Use /hub <hub_name> or /lobby <hub_name>."
-  usage-choose-others: "%prefix% &cWrong usage! &7Use /hub <hub_name> [player] or /lobby <hub_name> [player]>."
+  hub-usage: "%prefix% &cThis command does not require any arguments! &7Use just /hub or /lobby!"
+  hub-choose-usage: "%prefix% &cWrong use! &7Type /hub &e[hub_name]&7!"
+  hub-choose-others-usage: "%prefix% &cWrong use! &7Type /hub &e[hub_name] [player]&7!"
   reload-complete: "%prefix% &aReload complete!"
   no-permission: "%prefix% &cYou don't have permission to execute this command!"
   unknown-command: "%prefix% &cUnknown command! &7Type /hs help for help."
   no-players: "%prefix% &cAt least one person must be connected to the server to perform the reload!"
-
-
-# Messages version - DO NOT CHANGE IT!
-messages-version: 1.0
+  setactive-usage: "%prefix% &cWrong use! &7Type: /hs setactive <hub> &e<true/false>"
+  setactive-already-active: "%prefix% &cThis hub is already active!"
+  setactive-already-inactive: "%prefix% &cThis hub is already inactive!"
+  setactive-success-active: "%prefix% &7Hub was successfuly activated!"
+  setactive-success-inactive: "%prefix% &7Hub was successfuly deactivated!"
+  setname-usage: '%prefix% &cWrong use! &7Type: /hs setname &e<hub> &e<name>'
+  setname-success: "%prefix% &7Hub name was successfully changed!"
+  setslots-usage: "%prefix% &cWrong use! &7Type: /hs setslots &e<hub> &e<slots>"
+  setslots-success: "%prefix% &7Hub slots count was successfully changed!"
+  setvip-usage: "%prefix% &cWrong use! &7Type: /hs setvip &e<hub> &e<true/false>"
+  setvip-already-vip: "%prefix% &cThis hub is already only for VIPs!"
+  setvip-already-notvip: "%prefix% &cThis hub is already for everyone!"
+  setvip-success-vip: "%prefix% &7Hub was successfuly set to VIP!"
+  setvip-success-notvip: "%prefix% &7Hub was successfuly set to normal!"
+  kick-usage: "%prefix% &cWrong use! &7Type: /hs kick &e<hub>"
+  kick-offline: "%prefix% &cThe hub is offline!"
+  kick-active: "%prefix% &cThe hub has to be inactive to kick players from it!"
+  kick-empty: "%prefix% &cThe hub is empty!"
+  kick-success: "%prefix% &7All players were kicked from the hub!"
+  skipqueue-usage: "%prefix% &cWrong use! &7Type: /hs skipqueue &e<player>"
+  queue-not-available: "%prefix% &cThe queue is disabled!"
+  skipqueue-not-available: "%prefix% &cThe queue is disabled or the queue server is offline!"
+  skipqueue-not-in-queue: "%prefix% &cThis player is not in queue!"
+  skipqueue-no-servers: "%prefix% &cThere aren't any available hubs!"
+  pausequeue-usage: "%prefix% &cWrong use! &7Type: /hs pausequeue &e<true/false>"
+  pausequeue-already-paused: "%prefix% &cThe queue is already paused!"
+  pausequeue-already-unpaused: "%prefix% &cThe queue isn't paused!"
+  pausequeue-success-paused: "%prefix% &7Queue was successfully paused!"
+  pausequeue-success-unpaused: "%prefix% &7Queue is no longer paused!"
+  menu-usage: "%prefix% &cWrong use! &7Type: /hs menu"
+  menu-others-usage: "%prefix% &cWrong use! &7Type: /hs menu &e[player]"
+  menu-success: "%prefix% &7Opened hub selector menu"
+  menu-others-success: "%prefix% &7Opened hub selector menu for player &e%player%"
+queue:
+  title: "&e&lPosition: &b&l%pos%&7/&b&l%max%"
+  subtitle: "&7Priority: %priority%"
+  bossbar:
+    - "&6&lBUY A RANK TO GAIN HIGHER PRIORITY IN QUEUE"
+    - "&7&lWaiting for available server..."
+  tablist-header: "\n &b&kx &d&lYourServer &b&kx \n"
+  tablist-footer: "\n &7Website: &eyourserver.com \n &7Discord: &ediscord.gg/yourserver \n"
+  default-rank: "&7Default"
+  hours: "&e%hours%h"
+  minutes: "&e%minutes%m"
+  seconds: "&e%seconds%s"
+  waiting-time: "&7Estimated waiting time: &e%time%"
+  waiting-unpredictable: "&7Unable to estimate waiting time"
+  waiting-paused: "&cQueue is paused"

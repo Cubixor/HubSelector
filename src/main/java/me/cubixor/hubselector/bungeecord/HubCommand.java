@@ -1,5 +1,7 @@
 package me.cubixor.hubselector.bungeecord;
 
+import me.cubixor.hubselector.utils.Hub;
+import me.cubixor.hubselector.utils.PermissionUtils;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
@@ -12,9 +14,9 @@ public class HubCommand extends Command implements TabExecutor {
 
     HubSelectorBungee plugin;
 
-    public HubCommand(HubSelectorBungee hsb) {
+    public HubCommand() {
         super("hub", "", "lobby");
-        plugin = hsb;
+        plugin = HubSelectorBungee.getInstance();
     }
 
     @Override
@@ -25,50 +27,47 @@ public class HubCommand extends Command implements TabExecutor {
         }
 
         ProxiedPlayer player = (ProxiedPlayer) sender;
-        boolean vipPlayer = player.hasPermission("hub.vip");
-
-        HubChoose hubChoose = new HubChoose(plugin);
-
-        if (!player.hasPermission("hub.use")) {
+        if (!PermissionUtils.hasPermission(player, "hub.use")) {
             sender.sendMessage(plugin.getMessage("command.no-permission"));
             return;
         }
 
-        if (!player.hasPermission("hub.choose") && !player.hasPermission("hub.choose.others")) {
+        HubChoose hubChoose = new HubChoose();
+
+        if (!PermissionUtils.hasPermission(player, "hub.choose") && !PermissionUtils.hasPermission(player, "hub.choose.others")) {
             if (args.length != 0) {
-                sender.sendMessage(plugin.getMessage("command.usage"));
+                sender.sendMessage(plugin.getMessage("command.hub-usage"));
             } else {
-                hubChoose.hubCheck(player, vipPlayer);
+                hubChoose.connectToHub(player, true, false);
             }
 
         } else {
-            if (!player.hasPermission("hub.choose.others")) {
+            if (!PermissionUtils.hasPermission(player, "hub.choose.others")) {
                 switch (args.length) {
                     case (1):
-                        hubChoose.chooseHub(player, player.getName(), args[0], vipPlayer);
+                        hubChoose.connectToSpecifiedHub(player, player.getName(), args[0]);
                         break;
                     case (0):
-                        hubChoose.hubCheck(player, vipPlayer);
+                        hubChoose.connectToHub(player, true, false);
                         break;
                     default:
-                        sender.sendMessage(plugin.getMessage("command.usage-choose"));
+                        sender.sendMessage(plugin.getMessage("command.hub-choose-usage"));
                         break;
                 }
-
 
             } else {
                 switch (args.length) {
                     case (2):
-                        hubChoose.chooseHub(player, args[1], args[0], vipPlayer);
+                        hubChoose.connectToSpecifiedHub(player, args[1], args[0]);
                         break;
                     case (1):
-                        hubChoose.chooseHub(player, player.getName(), args[0], vipPlayer);
+                        hubChoose.connectToSpecifiedHub(player, player.getName(), args[0]);
                         break;
                     case (0):
-                        hubChoose.hubCheck(player, vipPlayer);
+                        hubChoose.connectToHub(player, true, false);
                         break;
                     default:
-                        sender.sendMessage(plugin.getMessage("command.usage-choose-others"));
+                        sender.sendMessage(plugin.getMessage("command.hub-choose-others-usage"));
                         break;
                 }
             }
@@ -80,31 +79,27 @@ public class HubCommand extends Command implements TabExecutor {
     public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
         List<String> result = new ArrayList<>();
         ProxiedPlayer player = (ProxiedPlayer) sender;
-        if (player.hasPermission("hub.choose")) {
-            if (!player.hasPermission("hub.choose.others")) {
-                if (args.length == 1) {
-                    result.addAll(plugin.getConfig().getSection("hub-servers").getKeys());
-                }
-            } else {
-                switch (args.length) {
-                    case 1:
-                        result.add("*");
-                        for (String s : plugin.getConfig().getSection("hub-servers").getKeys()) {
-                            if (s.toLowerCase().startsWith(args[0].toLowerCase())) {
-                                result.add(s);
-                            }
+        if (PermissionUtils.hasPermission(player, "hub.choose") || PermissionUtils.hasPermission(player, "hub.choose.others")) {
+            switch (args.length) {
+                case 1:
+                    result.add("*");
+                    for (Hub hub : plugin.getHubs()) {
+                        String server = hub.getServer();
+                        if (server.toLowerCase().startsWith(args[0].toLowerCase())) {
+                            result.add(server);
                         }
-                        break;
-                    case 2:
+                    }
+                    break;
+                case 2:
+                    if (PermissionUtils.hasPermission(player, "hub.choose.others")) {
                         for (ProxiedPlayer p : plugin.getProxy().getPlayers()) {
                             String pString = p.getName();
                             if (pString.toLowerCase().startsWith(args[1].toLowerCase())) {
                                 result.add(pString);
-
                             }
                         }
-                        break;
-                }
+                    }
+                    break;
             }
         }
         return result;
