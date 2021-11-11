@@ -456,13 +456,17 @@ public class HubSelectorCommand extends Command implements TabExecutor {
                         (PermissionUtils.hasPermission(sender, "hub.command.setvip") && "setvip".startsWith(args[0])) ||
                         (PermissionUtils.hasPermission(sender, "hub.command.kick") && "kick".startsWith(args[0]))) {
                     for (Hub hub : plugin.getHubs()) {
-                        result.add(hub.getServer());
+                        if (hub.getServer().startsWith(args[1])) {
+                            result.add(hub.getServer());
+                        }
                     }
                 }
                 if (PermissionUtils.hasPermission(sender, "hub.command.skipqueue") && "skipqueue".startsWith(args[0])) {
                     if (QueueUtils.queueAvailable()) {
                         for (ProxiedPlayer player : plugin.getQueueServer().getPlayers()) {
-                            result.add(player.getName());
+                            if (player.getName().startsWith(args[1])) {
+                                result.add(player.getName());
+                            }
                         }
                     }
                 }
@@ -476,7 +480,11 @@ public class HubSelectorCommand extends Command implements TabExecutor {
                 }
                 if (PermissionUtils.hasPermission(sender, "hub.command.menu.others") && "menu".startsWith(args[0])) {
                     for (List<String> list : plugin.getServerSlots().values()) {
-                        result.addAll(list);
+                        for (String player : list) {
+                            if (player.startsWith(args[1])) {
+                                result.add(player);
+                            }
+                        }
                     }
                 }
                 break;

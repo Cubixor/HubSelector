@@ -42,7 +42,6 @@ public class HubUtils {
     }
 
     public static boolean checkIfFull(Hub hub) {
-        //return HubUtils.getServerInfo(hub).getPlayers().size() >= hub.getSlots();
         return HubSelectorBungee.getInstance().getServerSlots().get(hub.getServer()).size() >= hub.getSlots();
     }
 
@@ -73,13 +72,6 @@ public class HubUtils {
     }
 
     public static boolean checkIfAvailable(Hub hub, ProxiedPlayer player, boolean ignoreBypasses) {
-/*
-        System.out.println("online" + checkIfOnline(hub));
-        System.out.println("current" + !checkIfCurrent(hub, player));
-        System.out.println("full" + !checkIfFull(hub, player, ignoreBypasses));
-        System.out.println("active" + checkIfActive(hub, player, ignoreBypasses));
-        System.out.println("vip" + (player.hasPermission("hub.vip") || !hub.isVip()));
-*/
         return checkIfOnline(hub)
                 && !checkIfCurrent(hub, player)
                 && !checkIfFull(hub, player, ignoreBypasses)
@@ -114,8 +106,7 @@ public class HubUtils {
 
     public static HubData setHubData(Hub hub, ProxiedPlayer player) {
 
-        List<String> players = new ArrayList<>();
-        HubUtils.getServerInfo(hub).getPlayers().forEach(p -> players.add(p.getName()));
+        List<String> players = new ArrayList<>(HubSelectorBungee.getInstance().getServerSlots().get(hub.getServer()));
         boolean online = HubUtils.checkIfOnline(hub);
         boolean current = HubUtils.checkIfCurrent(hub, player);
         boolean full = HubUtils.checkIfFull(hub, player, true);

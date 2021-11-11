@@ -58,7 +58,9 @@ public final class HubSelectorBungee extends Plugin {
         getProxy().getPluginManager().registerCommand(this, new HubCommand());
         getProxy().getPluginManager().registerCommand(this, new HubSelectorCommand());
 
-        loadConfigs();
+        if (!loadConfigs()) {
+            return;
+        }
 
         new JoinMethod().setupJoinMethod();
 
@@ -78,7 +80,7 @@ public final class HubSelectorBungee extends Plugin {
         getProxy().getScheduler().cancel(this);
     }
 
-    public void loadConfigs() {
+    public boolean loadConfigs() {
         if (!getDataFolder().exists()) {
             getDataFolder().mkdir();
         }
@@ -120,19 +122,45 @@ public final class HubSelectorBungee extends Plugin {
 
         if (getConfig().getBoolean("queue.use-queue")) {
             queueServer = getProxy().getServerInfo(getHubServers().getString("queue-server"));
+
+            if (queueServer == null) {
+                this.getProxy().getPluginManager().unregisterListeners(this);
+                this.getProxy().getPluginManager().unregisterCommands(this);
+                try {
+                    throw new Exception("Your queue server isn't registered in bungeecord config! Disabling the plugin!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+
             QueueMainBungee.getInstance().queueOnlineChecker(queueServer);
             new QueueSetupBungee().setup();
         }
 
         for (Hub hub : getHubs()) {
-            new SocketServerSender().getConfiguration(HubUtils.getServerInfo(hub).getName());
+            ServerInfo serverInfo = HubUtils.getServerInfo(hub);
+
+            if (serverInfo == null) {
+                this.getProxy().getPluginManager().unregisterListeners(this);
+                this.getProxy().getPluginManager().unregisterCommands(this);
+                try {
+                    throw new Exception("One of your hub servers isn't registered in bungeecord config! Disabling the plugin!");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return false;
+            }
+
+            new SocketServerSender().getConfiguration(serverInfo.getName());
 
             List<String> players = new ArrayList<>();
-            for (ProxiedPlayer player : getProxy().getServerInfo(hub.getServer()).getPlayers()) {
+            for (ProxiedPlayer player : serverInfo.getPlayers()) {
                 players.add(player.getName());
             }
             serverSlots.put(hub.getServer(), players);
         }
+        return true;
     }
 
     private LinkedList<Hub> getHubsFromFile() {
@@ -197,15 +225,6 @@ public final class HubSelectorBungee extends Plugin {
         return finalMessage;
     }
 
-    /*public  HubSelectorApiInterface getApi(){
-        HubSelectorApiInterface hubSelectorApi = new HubSelectorApiInterface() {
-            @Override
-            public String hubConnect(ProxiedPlayer proxiedPlayer) {
-                return "asd";
-            }
-        };
-        return hubSelectorApi;
-    }*/
 
     public LinkedList<Hub> getHubs() {
         return hubs;
@@ -271,7 +290,10 @@ public final class HubSelectorBungee extends Plugin {
         this.queueServer = queueServer;
     }
 
-    public HashMap<String, List<String>> getServerSlots() {
+    public synchronized HashMap<String, List<String>> getServerSlots() {
+        for (String server : serverSlots.keySet()) {
+            serverSlots.get(server).remove(null);
+        }
         return serverSlots;
     }
 }

@@ -5,7 +5,6 @@ import me.cubixor.hubselector.bungeecord.HubSelectorBungee;
 import me.cubixor.hubselector.utils.QueueRank;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,9 +55,16 @@ public class QueueUtils {
     public static List<ProxiedPlayer> getQueuePlayers() {
         QueueMainBungee queue = QueueMainBungee.getInstance();
 
-        List<ProxiedPlayer> players = new ArrayList<>();
-        for (QueueRank queueRank : queue.getQueuePlayers().keySet()) {
-            players.addAll(queue.getQueuePlayers().get(queueRank));
+        List<ProxiedPlayer> players = new LinkedList<>();
+
+        for (QueueRank queueRank : new LinkedList<>(queue.getQueuePlayers().keySet())) {
+            for (ProxiedPlayer player : new LinkedList<>(queue.getQueuePlayers().get(queueRank))) {
+                if (player == null) {
+                    queue.getQueuePlayers().get(queueRank).remove(null);
+                } else {
+                    players.add(player);
+                }
+            }
         }
         return players;
     }
@@ -86,20 +92,25 @@ public class QueueUtils {
             return;
         }
 
-        for (QueueRank queueRank : queue.getQueuePlayers().keySet()) {
+        synchronized (queue.getQueuePlayers()) {
 
-            if (queue.getQueuePlayers().get(queueRank).isEmpty()) {
-                continue;
-            }
+            for (QueueRank queueRank : new LinkedList<>(queue.getQueuePlayers().keySet())) {
 
-            for (ProxiedPlayer player : new LinkedList<>(queue.getQueuePlayers().get(queueRank))) {
-                if (!player.isConnected()) {
-                    queue.getQueuePlayers().get(queueRank).remove(player);
+                if (queue.getQueuePlayers().get(queueRank).isEmpty()) {
+                    continue;
                 }
-                if (new HubChoose().connectToHub(player, false, false)) {
-                    queue.getQueuePlayers().get(queueRank).remove(player);
-                    for (ProxiedPlayer p : queue.getTimeJoined().keySet()) {
-                        queue.getTimeJoined().replace(p, new QueuePlayerData(LocalDateTime.now(), getQueuePlayers().indexOf(p) + 1));
+
+                for (ProxiedPlayer player : new LinkedList<>(queue.getQueuePlayers().get(queueRank))) {
+                    if (player == null || !player.isConnected()) {
+                        queue.getQueuePlayers().get(queueRank).remove(player);
+                        continue;
+                    }
+
+                    if (new HubChoose().connectToHub(player, false, false)) {
+                        queue.getQueuePlayers().get(queueRank).remove(player);
+                        for (ProxiedPlayer p : new ArrayList<>(queue.getTimeJoined().keySet())) {
+                            queue.getTimeJoined().replace(p, new QueuePlayerData(System.currentTimeMillis(), getQueuePlayers().indexOf(p) + 1));
+                        }
                     }
                 }
             }

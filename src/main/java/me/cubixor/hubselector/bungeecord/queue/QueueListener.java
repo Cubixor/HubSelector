@@ -14,7 +14,6 @@ import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,28 +36,25 @@ public class QueueListener implements Listener {
 
     @EventHandler
     public void onSwitch(ServerSwitchEvent evt) {
-        //int version = evt.getPlayer().getPendingConnection().getVersion();
-        System.out.println("queue switch " + evt.getPlayer().getServer().getInfo());
-        System.out.println("queue " + plugin.getQueueServer());
-
         if (evt.getPlayer().getServer().getInfo().equals(plugin.getQueueServer())) {
-            if (queue.getBossBar() != null) {
-                queue.getBossBar().addPlayer(evt.getPlayer());
-            }
             new QueueUtils().putInQueue(evt.getPlayer());
-            queue.getTimeJoined().put(evt.getPlayer(), new QueuePlayerData(LocalDateTime.now(), QueueUtils.getQueuePlayers().indexOf(evt.getPlayer()) + 1));
-            System.out.println("put1 " + queue.getQueuePlayers());
-            System.out.println("put2 " + queue.getTimeJoined());
+            queue.getTimeJoined().put(evt.getPlayer(), new QueuePlayerData(System.currentTimeMillis(), QueueUtils.getQueuePlayers().indexOf(evt.getPlayer()) + 1));
 
 
-            for (ProxiedPlayer player : queue.getTimeJoined().keySet()) {
-                if (player.equals(evt.getPlayer())) {
-                    continue;
+            synchronized (queue) {
+                if (queue.getBossBar() != null) {
+                    queue.getBossBar().addPlayer(evt.getPlayer());
                 }
 
-                int playerPos = QueueUtils.getQueuePlayers().indexOf(player) + 1;
-                if (queue.getTimeJoined().get(player).getJoinPosition() != playerPos) {
-                    queue.getTimeJoined().replace(player, new QueuePlayerData(LocalDateTime.now(), playerPos));
+                for (ProxiedPlayer player : new ArrayList<>(queue.getTimeJoined().keySet())) {
+                    if (player.equals(evt.getPlayer())) {
+                        continue;
+                    }
+
+                    int playerPos = QueueUtils.getQueuePlayers().indexOf(player) + 1;
+                    if (queue.getTimeJoined().get(player).getJoinPosition() != playerPos) {
+                        queue.getTimeJoined().replace(player, new QueuePlayerData(System.currentTimeMillis(), playerPos));
+                    }
                 }
             }
 
@@ -66,8 +62,10 @@ public class QueueListener implements Listener {
         }
 
         if (evt.getFrom() != null && evt.getFrom().equals(plugin.getQueueServer())) {
-            if (queue.getBossBar() != null) {
-                queue.getBossBar().removePlayer(evt.getPlayer());
+            synchronized (queue) {
+                if (queue.getBossBar() != null) {
+                    queue.getBossBar().removePlayer(evt.getPlayer());
+                }
             }
             queue.getTimeJoined().remove(evt.getPlayer());
         }
@@ -82,14 +80,14 @@ public class QueueListener implements Listener {
             removeFromQueue(evt.getTarget(), evt.getPlayer());
             queue.getTimeJoined().remove(evt.getPlayer());
 
-            for (ProxiedPlayer player : queue.getTimeJoined().keySet()) {
+            for (ProxiedPlayer player : new ArrayList<>(queue.getTimeJoined().keySet())) {
                 if (player.equals(evt.getPlayer())) {
                     continue;
                 }
 
                 int playerPos = QueueUtils.getQueuePlayers().indexOf(player) + 1;
-                if (queue.getTimeJoined().get(player).getJoinPosition() != playerPos) {
-                    queue.getTimeJoined().replace(player, new QueuePlayerData(LocalDateTime.now(), playerPos));
+                if (queue.getTimeJoined().containsKey(player) && queue.getTimeJoined().get(player).getJoinPosition() != playerPos) {
+                    queue.getTimeJoined().replace(player, new QueuePlayerData(System.currentTimeMillis(), playerPos));
                 }
             }
         }

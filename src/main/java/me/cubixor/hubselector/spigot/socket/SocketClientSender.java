@@ -57,12 +57,12 @@ public class SocketClientSender {
 
     }
 
-    public void menuCloseMessage(Player player) {
+    public void menuCloseMessage(String player) {
         try {
             ObjectOutputStream out = getOutputStream();
             if (out == null) return;
 
-            MenuClosePacket menuClosePacket = new MenuClosePacket(player.getName());
+            MenuClosePacket menuClosePacket = new MenuClosePacket(player);
 
             out.writeObject(menuClosePacket);
             out.flush();

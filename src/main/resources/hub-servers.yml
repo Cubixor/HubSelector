@@ -2,6 +2,7 @@
 #
 #  WARNING! You can change all values in this config (hub names, slots, vip and active states) using commands in-game.
 #  You DON'T HAVE TO edit this file and restart the server everytime you want to change them.
+#  The only thing which is NOT possible to do with commands is adding and removing hubs.
 
 
 #  hub: - Server name set in bungeecord config.yml. WARNING! This name and name in "servers" category in bungeecord config MUST MATCH!

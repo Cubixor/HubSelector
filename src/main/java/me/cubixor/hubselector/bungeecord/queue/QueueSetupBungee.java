@@ -56,6 +56,7 @@ public class QueueSetupBungee {
         queue.getActionBarRunnable().cancel();
         queue.getTitleRunnable().cancel();
         if (queue.getBossBar() != null) {
+            queue.setBossBar(null);
             queue.getBossBarRunnable().cancel();
         }
 

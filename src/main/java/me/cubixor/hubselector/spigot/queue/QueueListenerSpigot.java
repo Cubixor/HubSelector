@@ -30,7 +30,6 @@ public class QueueListenerSpigot implements Listener {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @EventHandler
     public void onJoin(PlayerJoinEvent evt) {
         World world = Bukkit.getWorld("queue");

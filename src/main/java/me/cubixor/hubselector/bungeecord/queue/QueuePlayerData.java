@@ -1,19 +1,17 @@
 package me.cubixor.hubselector.bungeecord.queue;
 
-import java.time.LocalDateTime;
-
 public class QueuePlayerData {
 
-    private final LocalDateTime timeJoined;
+    private final long timeJoined;
     private final int joinPosition;
 
 
-    public QueuePlayerData(LocalDateTime timeJoined, int joinPosition) {
+    public QueuePlayerData(long timeJoined, int joinPosition) {
         this.timeJoined = timeJoined;
         this.joinPosition = joinPosition;
     }
 
-    public LocalDateTime getTimeJoined() {
+    public long getTimeJoined() {
         return timeJoined;
     }
 

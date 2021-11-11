@@ -58,16 +58,16 @@ public class ServerJoin implements Listener {
                 }
             }
         }
-        System.out.println("switch " + plugin.getServerSlots());
     }
 
     @EventHandler
     public void onLeave(PlayerDisconnectEvent evt) {
+        for (String server : plugin.getServerSlots().keySet()) {
+            plugin.getServerSlots().get(server).remove(evt.getPlayer().getName());
+        }
+
+
         if (evt.getPlayer().getServer() == null) {
-            for (String server : plugin.getServerSlots().keySet()) {
-                plugin.getServerSlots().get(server).remove(evt.getPlayer().getName());
-                break;
-            }
             return;
         }
 
@@ -76,7 +76,6 @@ public class ServerJoin implements Listener {
         if (hub != null) {
             sendJoinLeaveMessage(evt.getPlayer(), evt.getPlayer().getServer().getInfo(), "leave");
             plugin.getServerSlots().get(serverInfo.getName()).remove(evt.getPlayer().getName());
-            System.out.println("leave " + plugin.getServerSlots());
 
             new QueueUtils().putInHub();
         }

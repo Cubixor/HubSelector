@@ -22,7 +22,7 @@ public class HubChoose {
     public static String chooseServer(ProxiedPlayer player, boolean kickIfFull, boolean kick, boolean bypass) {
         HubSelectorBungee plugin = HubSelectorBungee.getInstance();
 
-        if (QueueUtils.queueAvailable() && (QueueMainBungee.getInstance().isQueuePaused() && !bypass)) {
+        if (QueueUtils.queueAvailable() && (QueueMainBungee.getInstance().isQueuePaused() && !bypass && !PermissionUtils.hasPermission(player, "hub.bypass.queuepaused"))) {
             return plugin.getHubServers().getString("queue-server");
         }
 
@@ -30,7 +30,6 @@ public class HubChoose {
         LinkedList<String> availableVipServers = new LinkedList<>();
 
         for (Hub hub : plugin.getHubs()) {
-            //System.out.println(hub.toString());
 
             if (!bypass) {
                 if (!HubUtils.checkIfAvailable(hub, player, true)) {
@@ -68,11 +67,6 @@ public class HubChoose {
                 }
             }
             if (QueueUtils.queueAvailable()) {
-/*
-                if (!QueueUtils.isInQueue(player)) {
-                    new QueueUtils().putInQueue(player);
-                }
-*/
                 return plugin.getHubServers().getString("queue-server");
             } else {
                 if (!kick) {
@@ -148,10 +142,12 @@ public class HubChoose {
             if (hub != null) {
                 if (QueueUtils.isInQueue(player)) {
                     QueueMainBungee queue = QueueMainBungee.getInstance();
-                    if (plugin.getQueueServer().getPlayers().size() > 1) {
-                        queue.getJoinTimes().add(LocalDateTime.now());
-                    } else {
-                        queue.getJoinTimes().clear();
+                    synchronized (queue.getJoinTimes()) {
+                        if (plugin.getQueueServer().getPlayers().size() > 1) {
+                            queue.getJoinTimes().add(LocalDateTime.now());
+                        } else {
+                            queue.getJoinTimes().clear();
+                        }
                     }
                 }
                 sendToServer(player, HubUtils.getServerInfo(hub));
@@ -166,7 +162,6 @@ public class HubChoose {
     public void sendToServer(ProxiedPlayer player, ServerInfo serverInfo) {
         player.connect(serverInfo);
         plugin.getServerSlots().get(serverInfo.getName()).add(player.getName());
-        System.out.println("sendToServer " + plugin.getServerSlots());
         player.sendMessage(plugin.getMessage("connect.success", "%hub%", HubUtils.getHub(serverInfo.getName()).getName()));
     }
 }

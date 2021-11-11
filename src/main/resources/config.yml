@@ -17,19 +17,20 @@ hub-choose-method: LEAST-PLAYERS
 # Putting vip players on vip servers priority, using method chosen above, in section "hub-choose-method"
 #
 # If set to HIGH, plugin will try to put vip players on vip hubs.
-# For example if "hub-choose-method" is set to RANDOM plugin will put player on random vip server. If all vip servers are offline or full plugin will put player on regular server.
+# For example if "hub-choose-method" is set to RANDOM plugin will put vip player on random vip server.
+# If there are no available vip servers plugin will put player on regular server.
 #
 # If set to MEDIUM, plugin will include all servers when choosing server for vip player.
-# For example if "hub-choose-method" is set to RANDOM, plugin will put player on random vip or regular hub server.
+# For example if "hub-choose-method" is set to RANDOM, plugin will put vip player on random vip or regular hub server.
 #
-# If set to LOW, plugin will only put vip players on vip servers when all regular servers are unavailable (full or offline).
+# If set to LOW, plugin will only put vip players on vip servers when there aren't any regular servers available.
 #
 vip-priority: HIGH
 
 # Queue related settings
 queue:
 
-  # Should plugin use queue feature?
+  # Should plugin use queue feature? [true/false]
   use-queue: true
 
   # Commands that are allowed to be used while in queue.
@@ -37,20 +38,20 @@ queue:
     - help
     - spawn
 
-  # Enable or disable queue bossbar
-  # Remember that boss bar won't work if your server is using 1.8 version, and you have to disable it here!
-  bossbar-enabled: true
+  # Enable or disable queue boss bar [true/false]
+  # Remember that boss bar won't work if your server is using 1.8 version, AND YOU HAVE TO DISABLE IT HERE!
+  bossbar-enabled: false
 
   # Set how often boss bar message will change. [seconds]
   bossbar-change-rate: 5
 
   # Queue priority ranks
-  # Add as many if you want
-  # Players that have permission with lower priority value will be put in the queue before players with higher priority value
+  # Add as many as you want
+  # Players that have permission with lower priority value will be put in the queue before players with higher priority value.
   #
   # test - rank name, it can be anything except 'default'
   # permission - permission which determines player queue rank
-  # priority - queue priority value can be any number between 1 and 9999
+  # priority - queue priority value, can be any integer
   #
   # Template to copy:
   # test:
@@ -70,7 +71,7 @@ queue:
 # All settings connected with hub selector item.
 item:
 
-  # Should players have the hub item in inventory while in hub?
+  # Should players have the hub item in inventory while in hub? [true/false]
   show: true
 
   # Slot in which hub selector item will appear.
@@ -88,21 +89,21 @@ menu-update:
   # If false hubs' data displayed in hub menu (players, slots, hub state) will be updated every number of seconds set in "rate" section.
   update-on-open-only: false
 
-  # Set how often (in seconds) menu will update (player count, slots, hub state).
+  # Set how often (in seconds) menu will update (player count, slots, hub state). [seconds]
   # It matters only when "update-on-open-only" is set to "false".
   rate: 2
 
 # Should "close" item be shown at the bottom of menu? [true/false]
 show-menu-close-item: true
 
-# Maximum number of hub inventory rows per page. [1-5]
+# Maximum number of hub inventory rows per page.
 # Use a number between 1 and 5
 max-menu-rows: 5
 
 # If true player will be kicked from server after using /hub command while there is no available hubs and queue is disabled/unavailable. [true/false]
 kick-if-full: true
 
-# Hub change cooldown. Use it to prevent players from spamming. [true/false]
+# Hub change cooldown. Use it to prevent players from spamming. [seconds]
 change-cooldown: 10
 
 # All sounds used by plugin.

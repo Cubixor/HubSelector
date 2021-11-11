@@ -11,7 +11,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -65,7 +64,7 @@ public class HubSelector extends JavaPlugin {
         } else {
             try {
                 getBungeeSocket().getSocket().close();
-            } catch (IOException ignored) {
+            } catch (Exception ignored) {
             }
         }
     }

@@ -4,6 +4,7 @@ import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.XSound;
 import me.cubixor.hubselector.spigot.socket.SocketClientSender;
 import me.cubixor.hubselector.utils.HubData;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,11 +37,14 @@ public class HubMenu implements Listener {
         }
     }
 
-    public void menuDataSet(LinkedList<HubData> hubDataLinkedList, Player player) {
-        if (!plugin.getHubInventory().containsKey(player)) {
-            new SocketClientSender().menuCloseMessage(player);
+    public void menuDataSet(LinkedList<HubData> hubDataLinkedList, String playerName) {
+        Player player = Bukkit.getPlayerExact(playerName);
+
+        if (player == null) {
+            new SocketClientSender().menuCloseMessage(playerName);
             return;
         }
+
         int slot = 0;
         int menu = 0;
         for (HubData hubData : hubDataLinkedList) {

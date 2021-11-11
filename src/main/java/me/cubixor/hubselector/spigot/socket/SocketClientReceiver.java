@@ -89,11 +89,9 @@ public class SocketClientReceiver {
                 case HUB_DATA_ALL: {
                     AllHubsDataPacket allHubsDataPacket = (AllHubsDataPacket) object;
 
-                    Player player = Bukkit.getPlayerExact(allHubsDataPacket.getPlayer());
-
                     LinkedList<HubData> hubData = new LinkedList<>(allHubsDataPacket.getHubData());
 
-                    new HubMenu().menuDataSet(hubData, player);
+                    new HubMenu().menuDataSet(hubData, allHubsDataPacket.getPlayer());
 
                     break;
                 }

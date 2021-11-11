@@ -16,8 +16,16 @@ public class HubMenuUpdate implements Listener {
 
 
     public void updateMenu(ProxiedPlayer player) {
-        plugin.getMenuUpdateTask().put(player, plugin.getProxy().getScheduler().schedule(plugin, () ->
-                new SocketServerSender().sendALlHubsInfo(player), 0, plugin.getConfig().getInt("menu-update.rate"), TimeUnit.SECONDS).getId());
+        plugin.getMenuUpdateTask().put(player, plugin.getProxy().getScheduler().schedule(plugin, () -> {
+            if (player == null || plugin.getMenuUpdateTask().get(player) == null) {
+                return;
+            }
+            if (!player.isConnected()) {
+                plugin.getProxy().getScheduler().cancel(plugin.getMenuUpdateTask().get(player));
+            }
+            new SocketServerSender().sendALlHubsInfo(player);
+
+        }, 0, plugin.getConfig().getInt("menu-update.rate"), TimeUnit.SECONDS).getId());
     }
 
 

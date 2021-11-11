@@ -54,7 +54,7 @@ public class HubItem implements Listener {
                 plugin.getHubInventory().get((Player) evt.getPlayer()).contains(evt.getInventory()) &&
                 !plugin.getConfiguration().getBoolean("menu-update.update-on-open-only")) {
 
-            new SocketClientSender().menuCloseMessage((Player) evt.getPlayer());
+            new SocketClientSender().menuCloseMessage(evt.getPlayer().getName());
         }
     }
 

@@ -192,7 +192,13 @@ public class JoinMethod {
 
     }
 
-    private LinkedHashMap<String, Integer> sortByValue(HashMap<String, Integer> hashMap) {
+    private LinkedHashMap<String, Integer> sortServers(List<String> availableServers) {
+        HashMap<String, Integer> hashMap = new HashMap<>();
+
+        for (String s : availableServers) {
+            hashMap.put(s, plugin.getServerSlots().get(s).size());
+        }
+
         LinkedHashMap<String, Integer> temp = new LinkedHashMap<>();
 
         hashMap.entrySet()
@@ -200,19 +206,7 @@ public class JoinMethod {
                 .sorted(Map.Entry.comparingByValue())
                 .forEachOrdered(x -> temp.put(x.getKey(), x.getValue()));
 
-        System.out.println(temp);
-
         return temp;
-    }
-
-    private LinkedHashMap<String, Integer> sortServers(List<String> availableServers) {
-        HashMap<String, Integer> availableServersHash = new HashMap<>();
-
-        for (String s : availableServers) {
-            availableServersHash.put(s, plugin.getProxy().getServerInfo(s).getPlayers().size());
-        }
-
-        return sortByValue(availableServersHash);
     }
 
     private LinkedHashMap<String, Integer> sortServers(List<String> availableServers, List<String> availableVipServers) {
@@ -220,10 +214,6 @@ public class JoinMethod {
         availableAll.addAll(availableServers);
         availableAll.addAll(availableVipServers);
 
-        HashMap<String, Integer> availableAllHash = new HashMap<>();
-        for (String s : availableAll) {
-            availableAllHash.put(s, plugin.getProxy().getServerInfo(s).getPlayers().size());
-        }
-        return sortByValue(availableAllHash);
+        return sortServers(availableAll);
     }
 }

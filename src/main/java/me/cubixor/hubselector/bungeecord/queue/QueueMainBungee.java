@@ -11,7 +11,11 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
 import java.io.IOException;
 import java.net.Socket;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class QueueMainBungee {
 
@@ -19,7 +23,7 @@ public class QueueMainBungee {
 
     private final LinkedHashMap<QueueRank, LinkedList<ProxiedPlayer>> queuePlayers = new LinkedHashMap<>();
     private final List<LocalDateTime> joinTimes = new ArrayList<>();
-    private final HashMap<ProxiedPlayer, QueuePlayerData> timeJoined = new HashMap<>();
+    private final ConcurrentHashMap<ProxiedPlayer, QueuePlayerData> timeJoined = new ConcurrentHashMap<>();
     private ScheduledTask actionBarRunnable;
     private ScheduledTask titleRunnable;
     private ScheduledTask bossBarRunnable;
@@ -54,7 +58,7 @@ public class QueueMainBungee {
         instance = this;
     }
 
-    public LinkedHashMap<QueueRank, LinkedList<ProxiedPlayer>> getQueuePlayers() {
+    public synchronized LinkedHashMap<QueueRank, LinkedList<ProxiedPlayer>> getQueuePlayers() {
         return queuePlayers;
     }
 
@@ -94,11 +98,11 @@ public class QueueMainBungee {
         return queueOnline;
     }
 
-    public List<LocalDateTime> getJoinTimes() {
+    public synchronized List<LocalDateTime> getJoinTimes() {
         return joinTimes;
     }
 
-    public HashMap<ProxiedPlayer, QueuePlayerData> getTimeJoined() {
+    public synchronized ConcurrentHashMap<ProxiedPlayer, QueuePlayerData> getTimeJoined() {
         return timeJoined;
     }
 

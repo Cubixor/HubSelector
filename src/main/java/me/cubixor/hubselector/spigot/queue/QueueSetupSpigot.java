@@ -19,7 +19,6 @@ public class QueueSetupSpigot {
         createQueueWorld();
     }
 
-    @SuppressWarnings("deprecation")
     public void createQueueWorld() {
         WorldCreator worldCreator = new WorldCreator("queue");
         worldCreator.environment(World.Environment.THE_END).generateStructures(false).generator(new EmptyChunkGenerator());
@@ -42,7 +41,6 @@ public class QueueSetupSpigot {
         }
     }
 
-    @SuppressWarnings("deprecation")
     static class EmptyChunkGenerator extends ChunkGenerator {
 
         @Override

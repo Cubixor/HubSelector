@@ -37,7 +37,9 @@ public class QueueBossBar {
 
             @Override
             public void run() {
-                queue.getBossBar().setTitle(plugin.getMessageList("queue.bossbar").get(currentBarId));
+                synchronized (queue) {
+                    queue.getBossBar().setTitle(plugin.getMessageList("queue.bossbar").get(currentBarId));
+                }
                 if (currentBarId == size) {
                     currentBarId = 0;
                 } else {

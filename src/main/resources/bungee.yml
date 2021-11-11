@@ -3,74 +3,12 @@ version: ${project.version}
 main: me.cubixor.hubselector.bungeecord.HubSelectorBungee
 description: Hub Selector plugin
 author: Cubixor
-#permissions:
-#  hub.*:
-#    description: All plugin permisions
-#    default: false
-#    childern:
-#     - hub.vip: true
-#     - hub.use: true
-#     - hub.choose: true
-#     - hub.choose.others: true
-#     - hub.help: true
-#     - hub.reload: true
-#     - hub.bypass.*: true
-#     - hub.modify.*: true
-#     - hub.vipjoinmsg: true
-#     - hub.vipleavemsg: true
-#  hub.modify:
-#    default: false
-#    children:
-#      hub.modify.name: true
-#      hub.modify.slots: true
-#      hub.modify.vip: true
-#      hub.modify.active: true
-#  hub.bypass:
-#    default: false
-#    children:
-#      hub.bypass.full: true
-#      hub.bypass.inactive: true
-#      hub.bypass.cooldown: true
-#  hub.vip:
-#    default: false
-#  hub.joinmsg:
-#    default: true
-#  hub.vipjoinmsg:
-#    default: false
-#  hub.leavemsg:
-#    default: true
-#  hub.vipleavemsg:
-#    default: false
-#  hub.use:
-#    default: true
-#  hub.choose:
-#    default: true
-#  hub.choose.others:
-#    default: false
-#  hub.bypass.cooldown:
-#    default: false
-#  hub.bypass.full:
-#    default: false
-#  hub.bypass.inactive:
-#    default: false
-#  hub.help:
-#    default: true
-#  hub.reload:
-#    default: false
-#  hub.modify.active:
-#    default: false
-#  hub.modify.name:
-#    default: false
-#  hub.modify.slots:
-#    default: false
-#  hub.modify.vip:
-#    default: false
 commands:
   hub:
     description: Hub cmd
     usage: /hub
     aliases: lobby
   hubselector:
-    description: Hubselector cmd
+    description: HubSelector cmd
     usage: /hubselector
     aliases: hs
