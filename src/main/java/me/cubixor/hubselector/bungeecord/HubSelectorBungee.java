@@ -67,11 +67,14 @@ public final class HubSelectorBungee extends Plugin {
         new SocketServer().serverSetup(getConfig().getInt("socket-server-port"));
 
 
-        /*new UpdateCheckerBungeeCord(this, 73688).getVersion(version -> {
+        new UpdateCheckerBungeeCord(this, 97548).getVersion(version -> {
             if (!this.getDescription().getVersion().equalsIgnoreCase(version)) {
-                getLogger().warning("There is a new update of HubSelector available! Go to spigotmc.org and download it!");
+                getLogger().warning("There is a new update of HubSelector available!");
+                getLogger().warning("Go to https://www.spigotmc.org/resources/97548/ and download it!");
+                getLogger().warning("Your version: " + getDescription().getVersion());
+                getLogger().warning("New version: " + version);
             }
-        });*/
+        });
 
     }
 

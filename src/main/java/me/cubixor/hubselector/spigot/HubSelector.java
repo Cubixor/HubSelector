@@ -36,13 +36,6 @@ public class HubSelector extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        /*new UpdateCheckerSpigot(this, 73688).getVersion(version -> {
-            if (!this.getDescription().getVersion().equalsIgnoreCase(version)) {
-                getLogger().warning("There is a new update of HubSelector available! Go to spigotmc.org and download it!");
-            }
-        });*/
-
-
         SetupSpigot setupSpigot = new SetupSpigot();
         if (getServer().getMaxPlayers() != Integer.MAX_VALUE) {
             setupSpigot.changeSlots();
@@ -54,6 +47,16 @@ public class HubSelector extends JavaPlugin {
         } else {
             new QueueSetupSpigot().registerMethods();
         }
+
+
+        new UpdateCheckerSpigot(this, 97548).getVersion(version -> {
+            if (!this.getDescription().getVersion().equalsIgnoreCase(version)) {
+                getLogger().warning("There is a new update of HubSelector available!");
+                getLogger().warning("Go to https://www.spigotmc.org/resources/97548/ and download it!");
+                getLogger().warning("Your version: " + getDescription().getVersion());
+                getLogger().warning("New version: " + version);
+            }
+        });
     }
 
     @Override
