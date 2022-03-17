@@ -38,7 +38,7 @@ public class HubSelector extends JavaPlugin {
 
         SetupSpigot setupSpigot = new SetupSpigot();
         if (getServer().getMaxPlayers() != Integer.MAX_VALUE) {
-            setupSpigot.changeSlots();
+            setupSpigot.changeSlots(Integer.MAX_VALUE);
         }
         setupSpigot.createFile();
 

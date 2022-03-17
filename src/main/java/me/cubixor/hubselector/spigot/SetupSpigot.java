@@ -154,56 +154,66 @@ public class SetupSpigot {
         plugin.saveConfig();
     }
 
-    public void changeSlots() {
+    public void changeSlots(int slots) {
         try {
-            final Method serverGetHandle = plugin.getServer().getClass().getDeclaredMethod("getHandle");
-            final Object playerList = serverGetHandle.invoke(plugin.getServer());
-            final Field maxPlayersField = playerList.getClass().getSuperclass().getDeclaredField("maxPlayers");
-            maxPlayersField.setAccessible(true);
-            maxPlayersField.set(playerList, Integer.MAX_VALUE);
+            Method serverGetHandle = plugin.getServer().getClass().getDeclaredMethod("getHandle");
+            Object playerList = serverGetHandle.invoke(plugin.getServer());
+
+            Field maxPlayersField = getMaxPlayersField(playerList);
+            maxPlayersField.setInt(playerList, slots);
+
+            updateServerProperties();
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
         }
-        updateServerProperties();
     }
 
+    private Field getMaxPlayersField(Object playerList) throws ReflectiveOperationException {
+        Class<?> playerListClass = playerList.getClass().getSuperclass();
+
+        try {
+            Field field = playerListClass.getDeclaredField("maxPlayers");
+            field.setAccessible(true);
+            return field;
+        } catch (NoSuchFieldException e) {
+            for (Field field : playerListClass.getDeclaredFields()) {
+                if (field.getType() != int.class) {
+                    continue;
+                }
+
+                field.setAccessible(true);
+
+                if (field.getInt(playerList) == Bukkit.getMaxPlayers()) {
+                    return field;
+                }
+            }
+
+            throw new NoSuchFieldException("Unable to find maxPlayers field in " + playerListClass.getName());
+        }
+    }
 
     private void updateServerProperties() {
-        final Properties properties = new Properties();
-        final File propertiesFile = new File("server.properties");
+        Properties properties = new Properties();
+        File propertiesFile = new File("server.properties");
+
         try {
-            final InputStream is = new FileInputStream(propertiesFile);
-            try {
+            try (InputStream is = new FileInputStream(propertiesFile)) {
                 properties.load(is);
-                is.close();
-            } catch (Throwable t) {
-                try {
-                    is.close();
-                } catch (Throwable exception) {
-                    t.addSuppressed(exception);
-                }
-                throw t;
             }
-            final String maxPlayers = Integer.toString(plugin.getServer().getMaxPlayers());
+
+            String maxPlayers = Integer.toString(plugin.getServer().getMaxPlayers());
+
             if (properties.getProperty("max-players").equals(maxPlayers)) {
                 return;
             }
+
             properties.setProperty("max-players", maxPlayers);
-            final OutputStream os = new FileOutputStream(propertiesFile);
-            try {
+
+            try (OutputStream os = new FileOutputStream(propertiesFile)) {
                 properties.store(os, "Minecraft server properties");
-                os.close();
-            } catch (Throwable t2) {
-                try {
-                    os.close();
-                } catch (Throwable exception2) {
-                    t2.addSuppressed(exception2);
-                }
-                throw t2;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }
