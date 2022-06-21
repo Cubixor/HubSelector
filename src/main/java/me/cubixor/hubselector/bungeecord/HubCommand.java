@@ -15,7 +15,7 @@ public class HubCommand extends Command implements TabExecutor {
     HubSelectorBungee plugin;
 
     public HubCommand() {
-        super("hub", "", "lobby");
+        super("hub", "", "lobby", "l");
         plugin = HubSelectorBungee.getInstance();
     }
 
